@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Video Player App</string>
+    
+    <!-- Main Activity -->
+    <string name="video_url_hint">Enter video URL or select local file</string>
+    <string name="subtitle_url_hint">Enter subtitle URL or select SRT file (optional)</string>
+    <string name="play_button">Play Video</string>
+    <string name="select_video_file">Select Video File</string>
+    <string name="select_subtitle_file">Select Subtitle File</string>
+    
+    <!-- Player -->
+    <string name="show_subtitles">Show Subtitles Panel</string>
+    <string name="hide_subtitles">Hide Subtitles Panel</string>
+    <string name="subtitle_panel_title">Video Transcript</string>
+    
+    <!-- Floating Window -->
+    <string name="floating_player_notification_channel">Floating Player</string>
+    <string name="floating_player_notification_title">Video Playing in Background</string>
+    <string name="floating_player_notification_desc">Tap to return to player</string>
+    
+    <!-- Permissions -->
+    <string name="overlay_permission_required">Overlay permission required for floating player</string>
+    <string name="storage_permission_required">Storage permission required to access local files</string>
+    
+    <!-- Errors -->
+    <string name="error_loading_video">Error loading video</string>
+    <string name="error_loading_subtitles">Error loading subtitles</string>
+    <string name="error_invalid_url">Invalid URL format</string>
+    <string name="error_file_not_found">File not found</string>
+</resources>

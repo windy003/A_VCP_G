@@ -115,74 +115,63 @@ class SubtitleAdapter(
     }
     
     private fun openYoudaoTranslation(context: android.content.Context, text: String) {
+        val packageManager = context.packageManager
+        val possiblePackages = listOf(
+            "com.youdao.dict",           // 有道词典标准版
+            "com.youdao.dict.android",   // 有道词典Android版
+            "com.netease.youdaodict",    // 网易有道词典
+            "com.youdao.dictvoice",      // 有道语音词典
+            "com.youdao.dict.lite",      // 有道词典精简版
+            "com.youdao.dict.pro",       // 有道词典专业版
+            "com.netease.dict",          // 网易词典
+            "com.youdao.edu.dict"        // 有道教育词典
+        )
+        
         try {
-            // Method 1: Try Youdao Dictionary's search intent
-            val searchIntent = Intent().apply {
-                action = Intent.ACTION_SEARCH
-                putExtra("query", text)
-                setPackage("com.youdao.dict")
-            }
-            
-            val packageManager = context.packageManager
-            if (searchIntent.resolveActivity(packageManager) != null) {
-                context.startActivity(searchIntent)
-                return
-            }
-            
-            // Method 2: Try Youdao's custom scheme (multiple variations)
-            val schemeIntents = listOf(
-                Intent().apply {
-                    action = Intent.ACTION_VIEW
-                    data = Uri.parse("youdaodict://m.youdao.com/dict?le=eng&q=${Uri.encode(text)}")
-                },
-                Intent().apply {
-                    action = Intent.ACTION_VIEW
-                    data = Uri.parse("youdao://dict/${Uri.encode(text)}")
-                },
-                Intent().apply {
-                    action = "com.youdao.dict.SEARCH"
-                    putExtra("EXTRA_QUERY", text)
-                    setPackage("com.youdao.dict")
-                }
-            )
-            
-            for (schemeIntent in schemeIntents) {
-                if (schemeIntent.resolveActivity(packageManager) != null) {
-                    context.startActivity(schemeIntent)
-                    return
+            // Method 1: Check which Youdao package is installed
+            var installedPackage: String? = null
+            for (pkg in possiblePackages) {
+                try {
+                    packageManager.getPackageInfo(pkg, 0)
+                    installedPackage = pkg
+                    android.util.Log.d("YoudaoTranslation", "Found installed package: $pkg")
+                    break
+                } catch (e: Exception) {
+                    // Package not installed, try next
+                    android.util.Log.d("YoudaoTranslation", "Package not found: $pkg")
                 }
             }
             
-            // Method 3: Try launching Youdao app directly and use clipboard
-            val launchIntent = packageManager.getLaunchIntentForPackage("com.youdao.dict")
-            if (launchIntent != null) {
-                // Copy text to clipboard for user to paste in the app
-                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val clip = ClipData.newPlainText("Search Text", text)
-                clipboard.setPrimaryClip(clip)
-                
-                // Add additional launch parameters if possible
-                launchIntent.apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    putExtra("query", text)
-                    putExtra("word", text)
-                }
-                
-                context.startActivity(launchIntent)
-                
-                // Show helpful message
-                val message = if (text.length <= 20) {
-                    "有道词典已打开，\"$text\" 已复制到剪贴板\n点击搜索框粘贴查词"
-                } else {
-                    "有道词典已打开，选中文本已复制到剪贴板\n点击搜索框粘贴查词"
-                }
-                
-                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                return
+            // Also check all installed packages for any that might be Youdao-related
+            val allPackages = packageManager.getInstalledPackages(0)
+            val youdaoPackages = allPackages.filter { packageInfo ->
+                val pkg = packageInfo.packageName.lowercase()
+                (pkg.contains("youdao") || pkg.contains("netease")) &&
+                (pkg.contains("dict") || pkg.contains("translate") || pkg.contains("trans"))
+            }.map { it.packageName }
+            
+            // Also add broader dictionary search
+            val dictPackages = allPackages.filter { packageInfo ->
+                val pkg = packageInfo.packageName.lowercase()
+                pkg.contains("dict") && (
+                    pkg.contains("china") || pkg.contains("chinese") || 
+                    pkg.contains("translate") || pkg.contains("trans")
+                )
+            }.map { it.packageName }
+            
+            val allDetectedPackages = (youdaoPackages + dictPackages).distinct()
+            
+            android.util.Log.d("YoudaoTranslation", "All Youdao-related packages: $youdaoPackages")
+            android.util.Log.d("YoudaoTranslation", "All detected packages: $allDetectedPackages")
+            
+            // If we didn't find the expected packages, try any detected package
+            if (installedPackage == null && allDetectedPackages.isNotEmpty()) {
+                installedPackage = allDetectedPackages.first()
+                android.util.Log.d("YoudaoTranslation", "Using alternative package: $installedPackage")
             }
             
-            // Method 4: Check if user wants to install Youdao Dictionary
-            showInstallYoudaoDialog(context, text)
+            // DIAGNOSTIC: Show all detected packages to user temporarily
+            showPackageDetectionDialog(context, allDetectedPackages, possiblePackages, installedPackage, text)
             
         } catch (e: Exception) {
             // Final fallback to web version
@@ -204,6 +193,142 @@ class SubtitleAdapter(
                 android.widget.Toast.LENGTH_SHORT
             ).show()
         }
+    }
+    
+    private fun showPackageDetectionDialog(context: Context, detectedPackages: List<String>, possiblePackages: List<String>, foundPackage: String?, text: String) {
+        val message = StringBuilder()
+        message.append("有道词典集成诊断：\n\n")
+        
+        if (foundPackage != null) {
+            message.append("✓ 找到匹配的包：$foundPackage\n\n")
+        } else {
+            message.append("✗ 未找到预期的有道词典包\n\n")
+        }
+        
+        message.append("预期的有道词典包名：\n")
+        possiblePackages.forEach { pkg ->
+            val found = if (pkg == foundPackage) " ✓" else ""
+            message.append("• $pkg$found\n")
+        }
+        
+        message.append("\n检测到的所有词典相关包：\n")
+        if (detectedPackages.isEmpty()) {
+            message.append("• 未检测到任何词典相关包\n")
+        } else {
+            detectedPackages.forEach { message.append("• $it\n") }
+        }
+        
+        message.append("\n请截图此信息并反馈，以便改进检测逻辑。")
+        
+        AlertDialog.Builder(context)
+            .setTitle("有道词典检测诊断")
+            .setMessage(message.toString())
+            .setPositiveButton("继续翻译") { _, _ -> 
+                // Continue with the translation attempt
+                continueTranslationAfterDiagnostic(context, text, foundPackage)
+            }
+            .setNegativeButton("取消") { _, _ -> }
+            .show()
+    }
+    
+    private fun continueTranslationAfterDiagnostic(context: Context, text: String, installedPackage: String?) {
+        if (installedPackage != null) {
+            // Try to launch with the found package
+            attemptTranslationWithPackage(context, text, installedPackage)
+        } else {
+            // No package found, show install dialog
+            showInstallYoudaoDialog(context, text)
+        }
+    }
+    
+    private fun attemptTranslationWithPackage(context: Context, text: String, packageName: String) {
+        val packageManager = context.packageManager
+        
+        // Method 1: Try different intent approaches
+        val intentsToTry = listOf(
+            // Standard search intent
+            Intent().apply {
+                action = Intent.ACTION_SEARCH
+                putExtra("query", text)
+                putExtra(android.app.SearchManager.QUERY, text)
+                setPackage(packageName)
+            },
+            // Send text intent
+            Intent().apply {
+                action = Intent.ACTION_SEND
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, text)
+                putExtra("word", text)
+                setPackage(packageName)
+            },
+            // Process text intent (Android 6.0+)
+            Intent().apply {
+                action = Intent.ACTION_PROCESS_TEXT
+                type = "text/plain"
+                putExtra(Intent.EXTRA_PROCESS_TEXT, text)
+                setPackage(packageName)
+            },
+            // Custom search action
+            Intent().apply {
+                action = "com.youdao.dict.SEARCH"
+                putExtra("EXTRA_QUERY", text)
+                putExtra("query", text)
+                setPackage(packageName)
+            }
+        )
+        
+        for (intent in intentsToTry) {
+            if (intent.resolveActivity(packageManager) != null) {
+                try {
+                    context.startActivity(intent)
+                    return
+                } catch (e: Exception) {
+                    android.util.Log.d("YoudaoTranslation", "Intent failed: ${e.message}")
+                }
+            }
+        }
+        
+        // Method 2: Try URL schemes
+        val urlSchemes = listOf(
+            "youdaodict://m.youdao.com/dict?le=eng&q=${Uri.encode(text)}",
+            "youdao://dict/${Uri.encode(text)}",
+            "netease-youdao://dict/${Uri.encode(text)}",
+            "youdaodict://dict/${Uri.encode(text)}"
+        )
+        
+        for (scheme in urlSchemes) {
+            try {
+                val schemeIntent = Intent(Intent.ACTION_VIEW, Uri.parse(scheme))
+                if (schemeIntent.resolveActivity(packageManager) != null) {
+                    context.startActivity(schemeIntent)
+                    return
+                }
+            } catch (e: Exception) {
+                android.util.Log.d("YoudaoTranslation", "URL scheme failed: ${e.message}")
+            }
+        }
+        
+        // Method 3: Launch app directly with clipboard
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        if (launchIntent != null) {
+            // Copy text to clipboard
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Search Text", text)
+            clipboard.setPrimaryClip(clip)
+            
+            launchIntent.apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("query", text)
+                putExtra("word", text)
+            }
+            
+            context.startActivity(launchIntent)
+            Toast.makeText(context, "词典已打开，\"$text\" 已复制到剪贴板", Toast.LENGTH_LONG).show()
+            return
+        }
+        
+        // All methods failed
+        Toast.makeText(context, "无法启动词典应用，请手动打开有道词典", Toast.LENGTH_LONG).show()
     }
     
     private fun showInstallYoudaoDialog(context: Context, text: String) {

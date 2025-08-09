@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     
     private lateinit var binding: ActivityMainBinding
     private var selectedVideoUri: Uri? = null
+    private var selectedAudioUri: Uri? = null
     private var selectedSubtitleUri: Uri? = null
     
     private val videoPickerLauncher = registerForActivityResult(
@@ -32,6 +33,15 @@ class MainActivity : AppCompatActivity() {
             selectedVideoUri = it
             binding.etVideoUrl.setText(it.toString())
             updatePlayButtonState()
+        }
+    }
+    
+    private val audioPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            selectedAudioUri = it
+            binding.etAudioUrl.setText(it.toString())
         }
     }
     
@@ -86,6 +96,10 @@ class MainActivity : AppCompatActivity() {
                 checkStoragePermissionAndPickVideo()
             }
             
+            btnSelectAudioFile.setOnClickListener {
+                checkStoragePermissionAndPickAudio()
+            }
+            
             btnSelectSubtitleFile.setOnClickListener {
                 checkStoragePermissionAndPickSubtitle()
             }
@@ -111,6 +125,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
         videoPickerLauncher.launch("video/*")
+    }
+    
+    private fun checkStoragePermissionAndPickAudio() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) 
+                != PackageManager.PERMISSION_GRANTED) {
+                storagePermissionLauncher.launch(arrayOf(Manifest.permission.READ_MEDIA_AUDIO))
+                return
+            }
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) 
+                != PackageManager.PERMISSION_GRANTED) {
+                storagePermissionLauncher.launch(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE))
+                return
+            }
+        }
+        audioPickerLauncher.launch("audio/*")
     }
     
     private fun checkStoragePermissionAndPickSubtitle() {
@@ -148,6 +179,7 @@ class MainActivity : AppCompatActivity() {
     
     private fun playVideo() {
         val videoUrl = binding.etVideoUrl.text.toString().trim()
+        val audioUrl = binding.etAudioUrl.text.toString().trim()
         val subtitleUrl = binding.etSubtitleUrl.text.toString().trim()
         
         if (videoUrl.isEmpty()) {
@@ -158,6 +190,9 @@ class MainActivity : AppCompatActivity() {
         checkOverlayPermission {
             val intent = Intent(this, PlayerActivity::class.java).apply {
                 putExtra("video_url", videoUrl)
+                if (audioUrl.isNotEmpty()) {
+                    putExtra("audio_url", audioUrl)
+                }
                 if (subtitleUrl.isNotEmpty()) {
                     putExtra("subtitle_url", subtitleUrl)
                 }
@@ -196,6 +231,10 @@ class MainActivity : AppCompatActivity() {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) 
                 != PackageManager.PERMISSION_GRANTED) {
                 permissions.add(Manifest.permission.READ_MEDIA_VIDEO)
+            }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) 
+                != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.READ_MEDIA_AUDIO)
             }
         } else {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) 

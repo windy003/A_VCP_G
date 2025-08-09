@@ -3363,6 +3363,7 @@ int id btnCloseSubtitlePanel 0x7f0a0064
 int id btnPlay 0x7f0a0065
 int id btnPlayPause 0x7f0a0066
 int id btnRewind 0x7f0a0067
+int id btnSelectAudioFile 0x7f0a0246
 int id btnSelectSubtitleFile 0x7f0a0068
 int id btnSelectVideoFile 0x7f0a0069
 int id btnSubtitlePanel 0x7f0a006a
@@ -3450,6 +3451,7 @@ int id endToStart 0x7f0a00bb
 int id end_padder 0x7f0a00bc
 int id enterAlways 0x7f0a00bd
 int id enterAlwaysCollapsed 0x7f0a00be
+int id etAudioUrl 0x7f0a0247
 int id etSubtitleUrl 0x7f0a00bf
 int id etVideoUrl 0x7f0a00c0
 int id exitUntilCollapsed 0x7f0a00c1
@@ -4092,6 +4094,8 @@ int string abc_toolbar_collapse_description 0x7f10001a
 int string androidx_startup 0x7f10001b
 int string app_name 0x7f10001c
 int string appbar_scrolling_view_behavior 0x7f10001d
+int string audio_source 0x7f1000ed
+int string audio_url_hint 0x7f1000ee
 int string bottom_sheet_behavior 0x7f10001e
 int string bottomsheet_action_collapse 0x7f10001f
 int string bottomsheet_action_expand 0x7f100020
@@ -4289,6 +4293,7 @@ int string search_menu_title 0x7f1000df
 int string searchbar_scrolling_view_behavior 0x7f1000e0
 int string searchview_clear_text_content_description 0x7f1000e1
 int string searchview_navigation_content_description 0x7f1000e2
+int string select_audio_file 0x7f1000ef
 int string select_subtitle_file 0x7f1000e3
 int string select_video_file 0x7f1000e4
 int string show_subtitles 0x7f1000e5
@@ -4298,6 +4303,7 @@ int string status_bar_notification_info_overflow 0x7f1000e8
 int string storage_permission_required 0x7f1000e9
 int string subtitle_panel_title 0x7f1000ea
 int string subtitle_url_hint 0x7f1000eb
+int string video_source 0x7f1000f0
 int string video_url_hint 0x7f1000ec
 int style AlertDialog_AppCompat 0x7f110000
 int style AlertDialog_AppCompat_Light 0x7f110001

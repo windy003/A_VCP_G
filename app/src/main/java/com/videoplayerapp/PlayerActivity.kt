@@ -16,6 +16,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.MergingMediaSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.datasource.DefaultDataSource
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.videoplayerapp.adapter.SubtitleAdapter
 import com.videoplayerapp.databinding.ActivityPlayerBinding
@@ -118,11 +122,12 @@ class PlayerActivity : AppCompatActivity() {
     
     private fun loadContent() {
         val videoUrl = intent.getStringExtra("video_url") ?: return
+        val audioUrl = intent.getStringExtra("audio_url")
         val subtitleUrl = intent.getStringExtra("subtitle_url")
         
-        // Load video
-        val mediaItem = MediaItem.fromUri(Uri.parse(videoUrl))
-        exoPlayer?.setMediaItem(mediaItem)
+        // Create media source
+        val mediaSource = createMediaSource(videoUrl, audioUrl)
+        exoPlayer?.setMediaSource(mediaSource)
         exoPlayer?.prepare()
         exoPlayer?.playWhenReady = true
         
@@ -132,6 +137,26 @@ class PlayerActivity : AppCompatActivity() {
         }
         
         startSubtitleUpdates()
+    }
+    
+    private fun createMediaSource(videoUrl: String, audioUrl: String?): MediaSource {
+        val dataSourceFactory = DefaultDataSource.Factory(this)
+        
+        return if (audioUrl != null && audioUrl.isNotEmpty()) {
+            // Create separate video and audio sources
+            val videoSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(Uri.parse(videoUrl)))
+            
+            val audioSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(Uri.parse(audioUrl)))
+            
+            // Merge video and audio sources
+            MergingMediaSource(videoSource, audioSource)
+        } else {
+            // Single media source (video with embedded audio or video only)
+            ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(Uri.parse(videoUrl)))
+        }
     }
     
     private fun loadSubtitles(subtitleUrl: String) {

@@ -25,10 +25,16 @@ public final class ActivityMainBinding implements ViewBinding {
   public final Button btnPlay;
 
   @NonNull
+  public final Button btnSelectAudioFile;
+
+  @NonNull
   public final Button btnSelectSubtitleFile;
 
   @NonNull
   public final Button btnSelectVideoFile;
+
+  @NonNull
+  public final TextInputEditText etAudioUrl;
 
   @NonNull
   public final TextInputEditText etSubtitleUrl;
@@ -40,13 +46,16 @@ public final class ActivityMainBinding implements ViewBinding {
   public final TextView tvStatus;
 
   private ActivityMainBinding(@NonNull LinearLayout rootView, @NonNull Button btnPlay,
-      @NonNull Button btnSelectSubtitleFile, @NonNull Button btnSelectVideoFile,
+      @NonNull Button btnSelectAudioFile, @NonNull Button btnSelectSubtitleFile,
+      @NonNull Button btnSelectVideoFile, @NonNull TextInputEditText etAudioUrl,
       @NonNull TextInputEditText etSubtitleUrl, @NonNull TextInputEditText etVideoUrl,
       @NonNull TextView tvStatus) {
     this.rootView = rootView;
     this.btnPlay = btnPlay;
+    this.btnSelectAudioFile = btnSelectAudioFile;
     this.btnSelectSubtitleFile = btnSelectSubtitleFile;
     this.btnSelectVideoFile = btnSelectVideoFile;
+    this.etAudioUrl = etAudioUrl;
     this.etSubtitleUrl = etSubtitleUrl;
     this.etVideoUrl = etVideoUrl;
     this.tvStatus = tvStatus;
@@ -85,6 +94,12 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btnSelectAudioFile;
+      Button btnSelectAudioFile = ViewBindings.findChildViewById(rootView, id);
+      if (btnSelectAudioFile == null) {
+        break missingId;
+      }
+
       id = R.id.btnSelectSubtitleFile;
       Button btnSelectSubtitleFile = ViewBindings.findChildViewById(rootView, id);
       if (btnSelectSubtitleFile == null) {
@@ -94,6 +109,12 @@ public final class ActivityMainBinding implements ViewBinding {
       id = R.id.btnSelectVideoFile;
       Button btnSelectVideoFile = ViewBindings.findChildViewById(rootView, id);
       if (btnSelectVideoFile == null) {
+        break missingId;
+      }
+
+      id = R.id.etAudioUrl;
+      TextInputEditText etAudioUrl = ViewBindings.findChildViewById(rootView, id);
+      if (etAudioUrl == null) {
         break missingId;
       }
 
@@ -115,8 +136,9 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityMainBinding((LinearLayout) rootView, btnPlay, btnSelectSubtitleFile,
-          btnSelectVideoFile, etSubtitleUrl, etVideoUrl, tvStatus);
+      return new ActivityMainBinding((LinearLayout) rootView, btnPlay, btnSelectAudioFile,
+          btnSelectSubtitleFile, btnSelectVideoFile, etAudioUrl, etSubtitleUrl, etVideoUrl,
+          tvStatus);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

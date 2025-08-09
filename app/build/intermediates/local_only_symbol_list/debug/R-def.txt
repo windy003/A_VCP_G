@@ -27,10 +27,12 @@ id btnCloseSubtitlePanel
 id btnPlay
 id btnPlayPause
 id btnRewind
+id btnSelectAudioFile
 id btnSelectSubtitleFile
 id btnSelectVideoFile
 id btnSubtitlePanel
 id controlsOverlay
+id etAudioUrl
 id etSubtitleUrl
 id etVideoUrl
 id loadingIndicator
@@ -46,6 +48,8 @@ layout activity_player
 layout floating_player_layout
 layout item_subtitle
 string app_name
+string audio_source
+string audio_url_hint
 string error_file_not_found
 string error_invalid_url
 string error_loading_subtitles
@@ -56,12 +60,14 @@ string floating_player_notification_title
 string hide_subtitles
 string overlay_permission_required
 string play_button
+string select_audio_file
 string select_subtitle_file
 string select_video_file
 string show_subtitles
 string storage_permission_required
 string subtitle_panel_title
 string subtitle_url_hint
+string video_source
 string video_url_hint
 style FloatingButtonStyle
 style Theme.VideoPlayerApp

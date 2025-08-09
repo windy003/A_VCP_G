@@ -17,6 +17,8 @@
     <color name="surface">#FFFBFDF7</color>
     <color name="white">#FFFFFFFF</color>
     <string name="app_name">Video Player App</string>
+    <string name="audio_source">Audio Source (Optional)</string>
+    <string name="audio_url_hint">Enter audio URL or select local file (optional)</string>
     <string name="error_file_not_found">File not found</string>
     <string name="error_invalid_url">Invalid URL format</string>
     <string name="error_loading_subtitles">Error loading subtitles</string>
@@ -27,12 +29,14 @@
     <string name="hide_subtitles">Hide Subtitles Panel</string>
     <string name="overlay_permission_required">Overlay permission required for floating player</string>
     <string name="play_button">Play Video</string>
+    <string name="select_audio_file">Select Audio File</string>
     <string name="select_subtitle_file">Select Subtitle File</string>
     <string name="select_video_file">Select Video File</string>
     <string name="show_subtitles">Show Subtitles Panel</string>
     <string name="storage_permission_required">Storage permission required to access local files</string>
     <string name="subtitle_panel_title">Video Transcript</string>
     <string name="subtitle_url_hint">Enter subtitle URL or select SRT file (optional)</string>
+    <string name="video_source">Video Source</string>
     <string name="video_url_hint">Enter video URL or select local file</string>
     <style name="FloatingButtonStyle">
         <item name="android:layout_width">48dp</item>

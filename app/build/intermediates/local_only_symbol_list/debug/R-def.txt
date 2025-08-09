@@ -5,10 +5,12 @@ color black
 color floating_bg
 color floating_button_bg
 color on_background
+color on_primary
 color on_primary_container
 color on_surface
 color primary
 color primary_container
+color primary_light
 color subtitle_bg
 color subtitle_panel_bg
 color subtitle_text

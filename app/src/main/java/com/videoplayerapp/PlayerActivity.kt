@@ -219,6 +219,12 @@ class PlayerActivity : AppCompatActivity() {
     private fun showSubtitlePanel() {
         binding.subtitlePanel.visibility = View.VISIBLE
         binding.btnSubtitlePanel.text = getString(R.string.hide_subtitles)
+        
+        // Auto-scroll to current subtitle if playing
+        exoPlayer?.let { player ->
+            val currentPosition = player.currentPosition
+            subtitleAdapter?.updateActivePosition(currentPosition)
+        }
     }
     
     private fun hideSubtitlePanel() {

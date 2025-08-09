@@ -2123,12 +2123,14 @@ color notification_action_color_filter
 color notification_icon_bg_color
 color notification_material_background_media_default_color
 color on_background
+color on_primary
 color on_primary_container
 color on_surface
 color primary
 color primary_container
 color primary_dark_material_dark
 color primary_dark_material_light
+color primary_light
 color primary_material_dark
 color primary_material_light
 color primary_text_default_material_dark

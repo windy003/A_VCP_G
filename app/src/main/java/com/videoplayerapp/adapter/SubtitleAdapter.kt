@@ -3,7 +3,9 @@ package com.videoplayerapp.adapter
 import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.videoplayerapp.R
 import com.videoplayerapp.databinding.ItemSubtitleBinding
 import com.videoplayerapp.model.SubtitleItem
 
@@ -13,6 +15,7 @@ class SubtitleAdapter(
 ) : RecyclerView.Adapter<SubtitleAdapter.SubtitleViewHolder>() {
     
     private var currentActivePosition = -1
+    private var recyclerView: RecyclerView? = null
     
     inner class SubtitleViewHolder(private val binding: ItemSubtitleBinding) : 
         RecyclerView.ViewHolder(binding.root) {
@@ -26,9 +29,15 @@ class SubtitleAdapter(
                 if (isActive) {
                     tvTimestamp.setTypeface(null, Typeface.BOLD)
                     tvSubtitleText.setTypeface(null, Typeface.BOLD)
+                    root.setBackgroundColor(ContextCompat.getColor(root.context, R.color.primary_light))
+                    tvTimestamp.setTextColor(ContextCompat.getColor(root.context, R.color.primary))
+                    tvSubtitleText.setTextColor(ContextCompat.getColor(root.context, R.color.on_primary))
                 } else {
                     tvTimestamp.setTypeface(null, Typeface.NORMAL)
                     tvSubtitleText.setTypeface(null, Typeface.NORMAL)
+                    root.setBackgroundColor(ContextCompat.getColor(root.context, android.R.color.transparent))
+                    tvTimestamp.setTextColor(ContextCompat.getColor(root.context, R.color.primary))
+                    tvSubtitleText.setTextColor(ContextCompat.getColor(root.context, R.color.on_background))
                 }
                 
                 root.setOnClickListener {
@@ -45,6 +54,11 @@ class SubtitleAdapter(
             false
         )
         return SubtitleViewHolder(binding)
+    }
+    
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
     }
     
     override fun onBindViewHolder(holder: SubtitleViewHolder, position: Int) {
@@ -65,6 +79,8 @@ class SubtitleAdapter(
             }
             if (currentActivePosition >= 0) {
                 notifyItemChanged(currentActivePosition)
+                // Auto-scroll to current active subtitle
+                recyclerView?.smoothScrollToPosition(currentActivePosition)
             }
         }
     }

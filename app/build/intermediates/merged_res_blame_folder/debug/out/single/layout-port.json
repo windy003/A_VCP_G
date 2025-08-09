@@ -1,0 +1,6 @@
+[
+    {
+        "merged": "com.videoplayerapp-mergeDebugResources-40:/layout-port/activity_player.xml",
+        "source": "com.videoplayerapp-main-43:/layout-port/activity_player.xml"
+    }
+]

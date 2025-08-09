@@ -8,7 +8,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,7 +22,7 @@ import java.lang.String;
 
 public final class ActivityPlayerBinding implements ViewBinding {
   @NonNull
-  private final RelativeLayout rootView;
+  private final View rootView;
 
   @NonNull
   public final ImageButton btnCloseSubtitlePanel;
@@ -49,11 +48,11 @@ public final class ActivityPlayerBinding implements ViewBinding {
   @NonNull
   public final TextView subtitleView;
 
-  private ActivityPlayerBinding(@NonNull RelativeLayout rootView,
-      @NonNull ImageButton btnCloseSubtitlePanel, @NonNull Button btnSubtitlePanel,
-      @NonNull LinearLayout controlsOverlay, @NonNull ProgressBar loadingIndicator,
-      @NonNull PlayerView playerView, @NonNull LinearLayout subtitlePanel,
-      @NonNull RecyclerView subtitleRecyclerView, @NonNull TextView subtitleView) {
+  private ActivityPlayerBinding(@NonNull View rootView, @NonNull ImageButton btnCloseSubtitlePanel,
+      @NonNull Button btnSubtitlePanel, @NonNull LinearLayout controlsOverlay,
+      @NonNull ProgressBar loadingIndicator, @NonNull PlayerView playerView,
+      @NonNull LinearLayout subtitlePanel, @NonNull RecyclerView subtitleRecyclerView,
+      @NonNull TextView subtitleView) {
     this.rootView = rootView;
     this.btnCloseSubtitlePanel = btnCloseSubtitlePanel;
     this.btnSubtitlePanel = btnSubtitlePanel;
@@ -67,7 +66,7 @@ public final class ActivityPlayerBinding implements ViewBinding {
 
   @Override
   @NonNull
-  public RelativeLayout getRoot() {
+  public View getRoot() {
     return rootView;
   }
 
@@ -140,9 +139,9 @@ public final class ActivityPlayerBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityPlayerBinding((RelativeLayout) rootView, btnCloseSubtitlePanel,
-          btnSubtitlePanel, controlsOverlay, loadingIndicator, playerView, subtitlePanel,
-          subtitleRecyclerView, subtitleView);
+      return new ActivityPlayerBinding(rootView, btnCloseSubtitlePanel, btnSubtitlePanel,
+          controlsOverlay, loadingIndicator, playerView, subtitlePanel, subtitleRecyclerView,
+          subtitleView);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

@@ -3361,6 +3361,7 @@ id bounceEnd
 id bounceStart
 id btnClose
 id btnCloseSubtitlePanel
+id btnHelp
 id btnPlay
 id btnPlayPause
 id btnRewind
@@ -3598,6 +3599,7 @@ id material_value_index
 id matrix
 id media_actions
 id media_controller_compat_view_tag
+id menu_translate_youdao
 id message
 id middle
 id mini
@@ -4115,11 +4117,15 @@ string character_counter_overflowed_content_description
 string character_counter_pattern
 string clear_text_end_icon_content_description
 string error_a11y_label
+string error_audio_file_not_accessible
 string error_file_not_found
 string error_icon_content_description
 string error_invalid_url
 string error_loading_subtitles
 string error_loading_video
+string error_no_permission
+string error_unsupported_format
+string error_video_file_not_accessible
 string exo_controls_cc_disabled_description
 string exo_controls_cc_enabled_description
 string exo_controls_custom_playback_speed
@@ -4179,6 +4185,7 @@ string fab_transformation_sheet_behavior
 string floating_player_notification_channel
 string floating_player_notification_desc
 string floating_player_notification_title
+string help_button
 string hide_bottom_view_on_scroll_behavior
 string hide_subtitles
 string icon_content_description
@@ -4306,6 +4313,8 @@ string subtitle_copied_to_clipboard
 string subtitle_help_text
 string subtitle_panel_title
 string subtitle_url_hint
+string translate_with_youdao
+string translation_failed
 string video_source
 string video_url_hint
 style AlertDialog_AppCompat
@@ -5624,3 +5633,4 @@ styleable ViewTransition android_id SharedValue SharedValueId clearsTag duration
 styleable include constraintSet
 xml backup_rules
 xml data_extraction_rules
+xml file_paths

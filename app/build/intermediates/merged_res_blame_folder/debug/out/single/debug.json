@@ -8,10 +8,6 @@
         "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\layout-port\\activity_player.xml"
     },
     {
-        "merged": "com.videoplayerapp-merged_res-41:/layout_item_subtitle.xml.flat",
-        "source": "com.videoplayerapp-main-43:/layout/item_subtitle.xml"
-    },
-    {
         "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\xml_backup_rules.xml.flat",
         "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\xml\\backup_rules.xml"
     },
@@ -54,5 +50,13 @@
     {
         "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\drawable_ic_play.xml.flat",
         "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\drawable\\ic_play.xml"
+    },
+    {
+        "merged": "com.videoplayerapp-merged_res-41:/layout_activity_main.xml.flat",
+        "source": "com.videoplayerapp-main-43:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.videoplayerapp-merged_res-41:/xml_file_paths.xml.flat",
+        "source": "com.videoplayerapp-main-43:/xml/file_paths.xml"
     }
 ]

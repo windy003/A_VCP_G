@@ -22,6 +22,9 @@ public final class ActivityMainBinding implements ViewBinding {
   private final LinearLayout rootView;
 
   @NonNull
+  public final Button btnHelp;
+
+  @NonNull
   public final Button btnPlay;
 
   @NonNull
@@ -45,12 +48,13 @@ public final class ActivityMainBinding implements ViewBinding {
   @NonNull
   public final TextView tvStatus;
 
-  private ActivityMainBinding(@NonNull LinearLayout rootView, @NonNull Button btnPlay,
-      @NonNull Button btnSelectAudioFile, @NonNull Button btnSelectSubtitleFile,
-      @NonNull Button btnSelectVideoFile, @NonNull TextInputEditText etAudioUrl,
-      @NonNull TextInputEditText etSubtitleUrl, @NonNull TextInputEditText etVideoUrl,
-      @NonNull TextView tvStatus) {
+  private ActivityMainBinding(@NonNull LinearLayout rootView, @NonNull Button btnHelp,
+      @NonNull Button btnPlay, @NonNull Button btnSelectAudioFile,
+      @NonNull Button btnSelectSubtitleFile, @NonNull Button btnSelectVideoFile,
+      @NonNull TextInputEditText etAudioUrl, @NonNull TextInputEditText etSubtitleUrl,
+      @NonNull TextInputEditText etVideoUrl, @NonNull TextView tvStatus) {
     this.rootView = rootView;
+    this.btnHelp = btnHelp;
     this.btnPlay = btnPlay;
     this.btnSelectAudioFile = btnSelectAudioFile;
     this.btnSelectSubtitleFile = btnSelectSubtitleFile;
@@ -88,6 +92,12 @@ public final class ActivityMainBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.btnHelp;
+      Button btnHelp = ViewBindings.findChildViewById(rootView, id);
+      if (btnHelp == null) {
+        break missingId;
+      }
+
       id = R.id.btnPlay;
       Button btnPlay = ViewBindings.findChildViewById(rootView, id);
       if (btnPlay == null) {
@@ -136,7 +146,7 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityMainBinding((LinearLayout) rootView, btnPlay, btnSelectAudioFile,
+      return new ActivityMainBinding((LinearLayout) rootView, btnHelp, btnPlay, btnSelectAudioFile,
           btnSelectSubtitleFile, btnSelectVideoFile, etAudioUrl, etSubtitleUrl, etVideoUrl,
           tvStatus);
     }

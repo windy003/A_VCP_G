@@ -9,6 +9,7 @@
     <string name="audio_url_hint">Enter audio URL or select local file (optional)</string>
     <string name="subtitle_url_hint">Enter subtitle URL or select SRT file (optional)</string>
     <string name="play_button">Play Video</string>
+    <string name="help_button">Help</string>
     <string name="select_video_file">Select Video File</string>
     <string name="select_audio_file">Select Audio File</string>
     <string name="select_subtitle_file">Select Subtitle File</string>
@@ -19,6 +20,8 @@
     <string name="subtitle_panel_title">Video Transcript</string>
     <string name="subtitle_help_text">Tap timestamp to jump to time, long press text to select</string>
     <string name="subtitle_copied_to_clipboard">Subtitle copied</string>
+    <string name="translate_with_youdao">有道翻译</string>
+    <string name="translation_failed">Translation failed</string>
     
     <!-- Floating Window -->
     <string name="floating_player_notification_channel">Floating Player</string>
@@ -34,4 +37,8 @@
     <string name="error_loading_subtitles">Error loading subtitles</string>
     <string name="error_invalid_url">Invalid URL format</string>
     <string name="error_file_not_found">File not found</string>
+    <string name="error_no_permission">Permission denied. Please grant file access permission or select another file.</string>
+    <string name="error_unsupported_format">Unsupported file format</string>
+    <string name="error_video_file_not_accessible">Video file is no longer accessible. Please select the file again.</string>
+    <string name="error_audio_file_not_accessible">Audio file is no longer accessible. Please select the file again.</string>
 </resources>

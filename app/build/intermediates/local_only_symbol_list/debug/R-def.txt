@@ -24,6 +24,7 @@ drawable ic_play
 drawable ic_replay_5
 id btnClose
 id btnCloseSubtitlePanel
+id btnHelp
 id btnPlay
 id btnPlayPause
 id btnRewind
@@ -36,6 +37,7 @@ id etAudioUrl
 id etSubtitleUrl
 id etVideoUrl
 id loadingIndicator
+id menu_translate_youdao
 id playerView
 id subtitlePanel
 id subtitleRecyclerView
@@ -50,13 +52,18 @@ layout item_subtitle
 string app_name
 string audio_source
 string audio_url_hint
+string error_audio_file_not_accessible
 string error_file_not_found
 string error_invalid_url
 string error_loading_subtitles
 string error_loading_video
+string error_no_permission
+string error_unsupported_format
+string error_video_file_not_accessible
 string floating_player_notification_channel
 string floating_player_notification_desc
 string floating_player_notification_title
+string help_button
 string hide_subtitles
 string overlay_permission_required
 string play_button
@@ -69,6 +76,8 @@ string subtitle_copied_to_clipboard
 string subtitle_help_text
 string subtitle_panel_title
 string subtitle_url_hint
+string translate_with_youdao
+string translation_failed
 string video_source
 string video_url_hint
 style FloatingButtonStyle
@@ -76,3 +85,4 @@ style Theme.VideoPlayerApp
 style Theme.VideoPlayerApp.FullScreen
 xml backup_rules
 xml data_extraction_rules
+xml file_paths

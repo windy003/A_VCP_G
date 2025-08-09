@@ -2027,6 +2027,7 @@
     <item name="material_clock_level" type="id"/>
     <item name="material_value_index" type="id"/>
     <item name="media_controller_compat_view_tag" type="id"/>
+    <item name="menu_translate_youdao" type="id"/>
     <item name="motion_base" type="id"/>
     <item name="mtrl_anchor_parent" type="id"/>
     <item name="mtrl_card_checked_layer_id" type="id"/>
@@ -2223,11 +2224,15 @@
     <string description="Screen reader announcement for when a checkbox is on error. [CHAR LIMIT=NONE]" name="error_a11y_label">
     Error: invalid
   </string>
+    <string name="error_audio_file_not_accessible">Audio file is no longer accessible. Please select the file again.</string>
     <string name="error_file_not_found">File not found</string>
     <string name="error_icon_content_description">Error</string>
     <string name="error_invalid_url">Invalid URL format</string>
     <string name="error_loading_subtitles">Error loading subtitles</string>
     <string name="error_loading_video">Error loading video</string>
+    <string name="error_no_permission">Permission denied. Please grant file access permission or select another file.</string>
+    <string name="error_unsupported_format">Unsupported file format</string>
+    <string name="error_video_file_not_accessible">Video file is no longer accessible. Please select the file again.</string>
     <string name="exo_controls_cc_disabled_description">Enable subtitles</string>
     <string name="exo_controls_cc_enabled_description">Disable subtitles</string>
     <string name="exo_controls_custom_playback_speed" translatable="false"><ns2:g example="1.05" id="playback_speed">%1$.2f</ns2:g>x</string>
@@ -2287,6 +2292,7 @@
     <string name="floating_player_notification_channel">Floating Player</string>
     <string name="floating_player_notification_desc">Tap to return to player</string>
     <string name="floating_player_notification_title">Video Playing in Background</string>
+    <string name="help_button">Help</string>
     <string name="hide_bottom_view_on_scroll_behavior" translatable="false">com.google.android.material.behavior.HideBottomViewOnScrollBehavior</string>
     <string name="hide_subtitles">Hide Subtitles Panel</string>
     <string description="Content description for an icon that appears in the title area of a dialog" name="icon_content_description">Dialog Icon</string>
@@ -2422,6 +2428,8 @@
     <string name="subtitle_help_text">Tap timestamp to jump to time, long press text to select</string>
     <string name="subtitle_panel_title">Video Transcript</string>
     <string name="subtitle_url_hint">Enter subtitle URL or select SRT file (optional)</string>
+    <string name="translate_with_youdao">有道翻译</string>
+    <string name="translation_failed">Translation failed</string>
     <string name="video_source">Video Source</string>
     <string name="video_url_hint">Enter video URL or select local file</string>
     <style name="AlertDialog.AppCompat" parent="Base.AlertDialog.AppCompat"/>

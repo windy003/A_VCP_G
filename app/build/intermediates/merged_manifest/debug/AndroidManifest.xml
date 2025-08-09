@@ -66,6 +66,15 @@
             android:foregroundServiceType="mediaPlayback" />
 
         <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.videoplayerapp.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true" >
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+        <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="com.videoplayerapp.androidx-startup"
             android:exported="false" >

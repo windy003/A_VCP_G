@@ -12,6 +12,7 @@ import android.os.Looper
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -100,7 +101,17 @@ class PlayerActivity : AppCompatActivity() {
                 }
                 
                 override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
-                    showError(getString(R.string.error_loading_video) + ": " + error.message)
+                    val errorMessage = when (error.errorCode) {
+                        androidx.media3.common.PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND -> 
+                            getString(R.string.error_file_not_found)
+                        androidx.media3.common.PlaybackException.ERROR_CODE_IO_NO_PERMISSION -> 
+                            getString(R.string.error_no_permission)
+                        androidx.media3.common.PlaybackException.ERROR_CODE_PARSING_CONTAINER_MALFORMED,
+                        androidx.media3.common.PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED -> 
+                            getString(R.string.error_unsupported_format)
+                        else -> getString(R.string.error_loading_video) + ": " + (error.message ?: "Unknown error")
+                    }
+                    showError(errorMessage)
                 }
             })
         }
@@ -142,20 +153,91 @@ class PlayerActivity : AppCompatActivity() {
     private fun createMediaSource(videoUrl: String, audioUrl: String?): MediaSource {
         val dataSourceFactory = DefaultDataSource.Factory(this)
         
-        return if (audioUrl != null && audioUrl.isNotEmpty()) {
-            // Create separate video and audio sources
-            val videoSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(Uri.parse(videoUrl)))
-            
-            val audioSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(Uri.parse(audioUrl)))
-            
-            // Merge video and audio sources
-            MergingMediaSource(videoSource, audioSource)
-        } else {
-            // Single media source (video with embedded audio or video only)
+        return try {
+            if (audioUrl != null && audioUrl.isNotEmpty()) {
+                // Validate and prepare URIs
+                val videoUri = Uri.parse(videoUrl)
+                val audioUri = Uri.parse(audioUrl)
+                
+                // Check URI validity before proceeding
+                if (!isUriAccessible(videoUri)) {
+                    showUriNotAccessibleDialog(getString(R.string.error_video_file_not_accessible))
+                    throw IllegalArgumentException("Video URI not accessible")
+                }
+                
+                if (!isUriAccessible(audioUri)) {
+                    showUriNotAccessibleDialog(getString(R.string.error_audio_file_not_accessible))
+                    throw IllegalArgumentException("Audio URI not accessible")
+                }
+                
+                grantUriPermissionIfNeeded(videoUri)
+                grantUriPermissionIfNeeded(audioUri)
+                
+                // Create separate video and audio sources
+                val videoSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(videoUri))
+                
+                val audioSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(audioUri))
+                
+                // Merge video and audio sources
+                MergingMediaSource(videoSource, audioSource)
+            } else {
+                // Single media source (video with embedded audio or video only)
+                val videoUri = Uri.parse(videoUrl)
+                
+                if (!isUriAccessible(videoUri)) {
+                    showUriNotAccessibleDialog(getString(R.string.error_video_file_not_accessible))
+                    throw IllegalArgumentException("Video URI not accessible")
+                }
+                
+                grantUriPermissionIfNeeded(videoUri)
+                
+                ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(videoUri))
+            }
+        } catch (e: Exception) {
+            showError("${getString(R.string.error_loading_video)}: ${e.message}")
+            // Return a dummy source to prevent crash
             ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(Uri.parse(videoUrl)))
+                .createMediaSource(MediaItem.fromUri(Uri.EMPTY))
+        }
+    }
+    
+    private fun isUriAccessible(uri: Uri): Boolean {
+        return try {
+            when (uri.scheme) {
+                "content" -> {
+                    // Check if content provider is available
+                    val cursor = contentResolver.query(uri, null, null, null, null)
+                    cursor?.use { true } ?: false
+                }
+                "file" -> {
+                    // Check if file exists
+                    val file = java.io.File(uri.path ?: "")
+                    file.exists() && file.canRead()
+                }
+                "http", "https" -> {
+                    // For URLs, assume accessible (will be checked during loading)
+                    true
+                }
+                else -> false
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
+    private fun grantUriPermissionIfNeeded(uri: Uri) {
+        try {
+            if (uri.scheme == "content") {
+                contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+        } catch (e: Exception) {
+            // Permission might already be granted or not needed
         }
     }
     
@@ -266,6 +348,22 @@ class PlayerActivity : AppCompatActivity() {
     private fun showError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         binding.loadingIndicator.visibility = View.GONE
+    }
+    
+    private fun showUriNotAccessibleDialog(message: String) {
+        binding.loadingIndicator.visibility = View.GONE
+        AlertDialog.Builder(this)
+            .setTitle("File Access Issue")
+            .setMessage("$message\n\nThis usually happens when:\n" +
+                    "• Files were selected through a third-party file manager\n" +
+                    "• The file manager app was updated or uninstalled\n" +
+                    "• Files were moved or deleted\n\n" +
+                    "Please go back and select the files again using the built-in Android file picker.")
+            .setPositiveButton("Go Back") { _, _ ->
+                finish()
+            }
+            .setCancelable(false)
+            .show()
     }
     
     override fun onStop() {

@@ -24,6 +24,10 @@
         android:text="Subtitle text"
         android:textSize="14sp"
         android:textColor="@color/on_background"
-        android:lineSpacingMultiplier="1.2" />
+        android:lineSpacingMultiplier="1.2"
+        android:textIsSelectable="true"
+        android:longClickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
 
 </LinearLayout>

@@ -1,5 +1,9 @@
 [
     {
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-mergeDebugResources-40:\\layout-port\\activity_player.xml",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\layout-port\\activity_player.xml"
+    },
+    {
         "merged": "com.videoplayerapp-mergeDebugResources-40:/layout-port/activity_player.xml",
         "source": "com.videoplayerapp-main-43:/layout-port/activity_player.xml"
     }

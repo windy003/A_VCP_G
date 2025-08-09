@@ -1,8 +1,13 @@
 package com.videoplayerapp.adapter
 
 import android.graphics.Typeface
+import android.text.method.LinkMovementMethod
+import android.view.ActionMode
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.videoplayerapp.R
@@ -25,6 +30,26 @@ class SubtitleAdapter(
                 tvTimestamp.text = subtitle.getFormattedStartTime()
                 tvSubtitleText.text = subtitle.text
                 
+                // Enable text selection
+                tvSubtitleText.setTextIsSelectable(true)
+                tvSubtitleText.customSelectionActionModeCallback = object : ActionMode.Callback {
+                    override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+                        return true // Allow default copy/select all actions
+                    }
+                    
+                    override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+                        return false
+                    }
+                    
+                    override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
+                        return false // Let default actions handle the clicks
+                    }
+                    
+                    override fun onDestroyActionMode(mode: ActionMode?) {
+                        // Action mode destroyed
+                    }
+                }
+                
                 // Highlight active subtitle
                 if (isActive) {
                     tvTimestamp.setTypeface(null, Typeface.BOLD)
@@ -40,11 +65,24 @@ class SubtitleAdapter(
                     tvSubtitleText.setTextColor(ContextCompat.getColor(root.context, R.color.on_background))
                 }
                 
-                root.setOnClickListener {
+                // Click on timestamp to jump to time
+                tvTimestamp.setOnClickListener {
                     onItemClick(subtitle)
+                }
+                
+                // Prevent root click when selecting text
+                root.setOnClickListener { view ->
+                    if (!tvSubtitleText.hasSelection()) {
+                        onItemClick(subtitle)
+                    }
                 }
             }
         }
+    }
+    
+    // Extension function to check if TextView has selected text
+    private fun TextView.hasSelection(): Boolean {
+        return selectionStart != selectionEnd
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubtitleViewHolder {

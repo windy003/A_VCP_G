@@ -17,6 +17,8 @@
     <string name="show_subtitles">Show Subtitles Panel</string>
     <string name="hide_subtitles">Hide Subtitles Panel</string>
     <string name="subtitle_panel_title">Video Transcript</string>
+    <string name="subtitle_help_text">Tap timestamp to jump to time, long press text to select</string>
+    <string name="subtitle_copied_to_clipboard">Subtitle copied</string>
     
     <!-- Floating Window -->
     <string name="floating_player_notification_channel">Floating Player</string>

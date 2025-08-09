@@ -2418,6 +2418,8 @@
     <string name="side_sheet_behavior" translatable="false">com.google.android.material.sidesheet.SideSheetBehavior</string>
     <string name="status_bar_notification_info_overflow">999+</string>
     <string name="storage_permission_required">Storage permission required to access local files</string>
+    <string name="subtitle_copied_to_clipboard">Subtitle copied</string>
+    <string name="subtitle_help_text">Tap timestamp to jump to time, long press text to select</string>
     <string name="subtitle_panel_title">Video Transcript</string>
     <string name="subtitle_url_hint">Enter subtitle URL or select SRT file (optional)</string>
     <string name="video_source">Video Source</string>

@@ -65,6 +65,8 @@ string select_subtitle_file
 string select_video_file
 string show_subtitles
 string storage_permission_required
+string subtitle_copied_to_clipboard
+string subtitle_help_text
 string subtitle_panel_title
 string subtitle_url_hint
 string video_source

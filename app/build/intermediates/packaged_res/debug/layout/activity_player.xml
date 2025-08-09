@@ -88,6 +88,16 @@
 
         </LinearLayout>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/subtitle_help_text"
+            android:textSize="12sp"
+            android:textColor="@color/on_background"
+            android:gravity="center"
+            android:padding="8dp"
+            android:alpha="0.7" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/subtitleRecyclerView"
             android:layout_width="match_parent"

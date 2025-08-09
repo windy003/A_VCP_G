@@ -34,6 +34,8 @@
     <string name="select_video_file">Select Video File</string>
     <string name="show_subtitles">Show Subtitles Panel</string>
     <string name="storage_permission_required">Storage permission required to access local files</string>
+    <string name="subtitle_copied_to_clipboard">Subtitle copied</string>
+    <string name="subtitle_help_text">Tap timestamp to jump to time, long press text to select</string>
     <string name="subtitle_panel_title">Video Transcript</string>
     <string name="subtitle_url_hint">Enter subtitle URL or select SRT file (optional)</string>
     <string name="video_source">Video Source</string>

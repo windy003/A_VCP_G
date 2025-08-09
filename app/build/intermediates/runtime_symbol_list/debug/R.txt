@@ -4301,6 +4301,8 @@ int string side_sheet_accessibility_pane_title 0x7f1000e6
 int string side_sheet_behavior 0x7f1000e7
 int string status_bar_notification_info_overflow 0x7f1000e8
 int string storage_permission_required 0x7f1000e9
+int string subtitle_copied_to_clipboard 0x7f1000f1
+int string subtitle_help_text 0x7f1000f2
 int string subtitle_panel_title 0x7f1000ea
 int string subtitle_url_hint 0x7f1000eb
 int string video_source 0x7f1000f0

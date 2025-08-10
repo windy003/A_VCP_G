@@ -14,6 +14,8 @@ import androidx.core.app.NotificationCompat
 import androidx.media3.exoplayer.ExoPlayer
 import com.videoplayerapp.MainActivity
 import com.videoplayerapp.R
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class FloatingPlayerService : Service() {
     
@@ -21,6 +23,7 @@ class FloatingPlayerService : Service() {
     private var floatingView: View? = null
     private var player: ExoPlayer? = null
     private var isFloatingWindowShown = false
+    private var layoutParams: WindowManager.LayoutParams? = null
     
     private val binder = LocalBinder()
     
@@ -82,7 +85,7 @@ class FloatingPlayerService : Service() {
         
         floatingView = LayoutInflater.from(this).inflate(R.layout.floating_player_layout, null)
         
-        val layoutParams = WindowManager.LayoutParams().apply {
+        layoutParams = WindowManager.LayoutParams().apply {
             width = WindowManager.LayoutParams.WRAP_CONTENT
             height = WindowManager.LayoutParams.WRAP_CONTENT
             type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -104,9 +107,6 @@ class FloatingPlayerService : Service() {
         
         try {
             windowManager?.addView(floatingView, layoutParams)
-            
-            // Make the floating window draggable
-            makeWindowDraggable(layoutParams)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -118,7 +118,8 @@ class FloatingPlayerService : Service() {
             val btnRewind = view.findViewById<ImageButton>(R.id.btnRewind)
             val btnClose = view.findViewById<ImageButton>(R.id.btnClose)
             
-            btnPlayPause.setOnClickListener {
+            // Setup draggable buttons with click functionality
+            setupDraggableButton(btnPlayPause) {
                 player?.let { exoPlayer ->
                     if (exoPlayer.isPlaying) {
                         exoPlayer.pause()
@@ -130,7 +131,7 @@ class FloatingPlayerService : Service() {
                 }
             }
             
-            btnRewind.setOnClickListener {
+            setupDraggableButton(btnRewind) {
                 player?.let { exoPlayer ->
                     val currentPosition = exoPlayer.currentPosition
                     val newPosition = maxOf(0, currentPosition - 5000) // Rewind 5 seconds
@@ -138,7 +139,7 @@ class FloatingPlayerService : Service() {
                 }
             }
             
-            btnClose.setOnClickListener {
+            setupDraggableButton(btnClose) {
                 hideFloatingWindow()
             }
             
@@ -157,26 +158,48 @@ class FloatingPlayerService : Service() {
         }
     }
     
-    private fun makeWindowDraggable(layoutParams: WindowManager.LayoutParams) {
-        floatingView?.setOnTouchListener(object : View.OnTouchListener {
+    private fun setupDraggableButton(button: View, clickAction: () -> Unit) {
+        button.setOnTouchListener(object : View.OnTouchListener {
             private var initialX = 0
             private var initialY = 0
             private var initialTouchX = 0f
             private var initialTouchY = 0f
+            private var startTime = 0L
+            private val clickTimeThreshold = 200L // 200ms
+            private val moveThreshold = 10f // 10px
             
             override fun onTouch(v: View?, event: MotionEvent?): Boolean {
                 when (event?.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        initialX = layoutParams.x
-                        initialY = layoutParams.y
-                        initialTouchX = event.rawX
-                        initialTouchY = event.rawY
+                        layoutParams?.let { params ->
+                            initialX = params.x
+                            initialY = params.y
+                            initialTouchX = event.rawX
+                            initialTouchY = event.rawY
+                            startTime = System.currentTimeMillis()
+                        }
                         return true
                     }
                     MotionEvent.ACTION_MOVE -> {
-                        layoutParams.x = initialX + (event.rawX - initialTouchX).toInt()
-                        layoutParams.y = initialY + (event.rawY - initialTouchY).toInt()
-                        windowManager?.updateViewLayout(floatingView, layoutParams)
+                        layoutParams?.let { params ->
+                            params.x = initialX + (event.rawX - initialTouchX).toInt()
+                            params.y = initialY + (event.rawY - initialTouchY).toInt()
+                            windowManager?.updateViewLayout(floatingView, params)
+                        }
+                        return true
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        val endTime = System.currentTimeMillis()
+                        val timeDiff = endTime - startTime
+                        val moveDistance = sqrt(
+                            (event.rawX - initialTouchX).toDouble().pow(2.0) +
+                            (event.rawY - initialTouchY).toDouble().pow(2.0)
+                        ).toFloat()
+                        
+                        // If it's a quick tap with minimal movement, treat as click
+                        if (timeDiff < clickTimeThreshold && moveDistance < moveThreshold) {
+                            clickAction.invoke()
+                        }
                         return true
                     }
                 }
@@ -184,6 +207,7 @@ class FloatingPlayerService : Service() {
             }
         })
     }
+    
     
     private fun canDrawOverlay(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

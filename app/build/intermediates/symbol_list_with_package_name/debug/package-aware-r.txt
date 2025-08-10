@@ -3822,6 +3822,7 @@ id triangle
 id tvStatus
 id tvSubtitleOffset
 id tvSubtitleText
+id tvTimeInfo
 id tvTimestamp
 id unchecked
 id uniform

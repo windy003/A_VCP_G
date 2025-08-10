@@ -47,6 +47,7 @@ id subtitleView
 id tvStatus
 id tvSubtitleOffset
 id tvSubtitleText
+id tvTimeInfo
 id tvTimestamp
 layout activity_main
 layout activity_player

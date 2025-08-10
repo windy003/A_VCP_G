@@ -33,16 +33,36 @@
 
     </LinearLayout>
 
-    <!-- 播放进度条 -->
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
+    <!-- 播放进度条和时间信息 -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:layout_marginTop="4dp"
-        android:progressTint="#FF4081"
-        android:progressBackgroundTint="#33FFFFFF"
-        android:max="100"
-        android:progress="0" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="4dp">
+        
+        <!-- 时间显示 -->
+        <TextView
+            android:id="@+id/tvTimeInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="00:00 / 00:00"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp"
+            android:gravity="center"
+            android:layout_marginBottom="2dp"
+            android:fontFamily="monospace" />
+        
+        <!-- 播放进度条 -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:progressTint="#FF4081"
+            android:progressBackgroundTint="#33FFFFFF"
+            android:max="100"
+            android:progress="0" />
+            
+    </LinearLayout>
 
 </LinearLayout>

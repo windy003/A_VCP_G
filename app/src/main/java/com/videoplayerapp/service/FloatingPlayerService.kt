@@ -14,6 +14,7 @@ import android.view.*
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.RemoteViews
+import android.widget.TextView
 import androidx.core.app.NotificationCompat
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -255,6 +256,7 @@ class FloatingPlayerService : Service() {
         floatingView?.let { view ->
             val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
             val btnPlayPause = view.findViewById<ImageButton>(R.id.btnPlayPause)
+            val tvTimeInfo = view.findViewById<TextView>(R.id.tvTimeInfo)
             
             player?.let { exoPlayer ->
                 val currentPosition = exoPlayer.currentPosition
@@ -268,8 +270,17 @@ class FloatingPlayerService : Service() {
                     progressBar?.progress = 0
                 }
                 
+                // Update time text
+                val currentTimeStr = formatTime(currentPosition)
+                val durationStr = if (duration > 0) formatTime(duration) else "00:00"
+                tvTimeInfo?.text = "$currentTimeStr / $durationStr"
+                
                 // Update play/pause button
                 updatePlayPauseButton(btnPlayPause)
+            } ?: run {
+                // When no player is available, show default time
+                tvTimeInfo?.text = "00:00 / 00:00"
+                progressBar?.progress = 0
             }
         }
     }

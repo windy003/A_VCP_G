@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.view.View
 import android.view.WindowManager
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -128,6 +129,10 @@ class PlayerActivity : AppCompatActivity() {
         }
         
         binding.playerView.player = exoPlayer
+        binding.playerView.useController = true // Use default ExoPlayer controls
+        binding.playerView.controllerAutoShow = false // Don't show automatically
+        binding.playerView.controllerHideOnTouch = true // Hide when touching outside controls
+        binding.playerView.controllerShowTimeoutMs = 3000 // Auto hide after 3 seconds
     }
     
     private fun setupUI() {
@@ -149,6 +154,7 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
     }
+    
     
     private fun loadContent() {
         val videoUrl = intent.getStringExtra("video_url") ?: return
@@ -385,15 +391,33 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
     
+    private fun formatTime(timeMs: Long): String {
+        if (timeMs <= 0) return "00:00"
+        
+        val totalSeconds = timeMs / 1000
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        
+        return if (minutes >= 60) {
+            val hours = minutes / 60
+            val remainingMinutes = minutes % 60
+            String.format("%02d:%02d:%02d", hours, remainingMinutes, seconds)
+        } else {
+            String.format("%02d:%02d", minutes, seconds)
+        }
+    }
+    
+    
     private fun startSubtitleUpdates() {
         updateRunnable = object : Runnable {
             override fun run() {
                 exoPlayer?.let { player ->
                     val currentPosition = player.currentPosition
                     val adjustedPosition = currentPosition + subtitleDelayMs
+                    val duration = player.duration
                     
                     // Save position periodically
-                    if (currentPosition > 0 && currentPosition - lastSavedPosition > savePositionInterval) {
+                    if (currentPosition - lastSavedPosition > savePositionInterval) {
                         savePlaybackPosition(currentPosition)
                         lastSavedPosition = currentPosition
                     }

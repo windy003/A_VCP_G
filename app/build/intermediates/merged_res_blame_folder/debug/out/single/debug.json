@@ -1,58 +1,66 @@
 [
     {
-        "merged": "com.videoplayerapp-merged_res-41:/drawable_ic_close.xml.flat",
-        "source": "com.videoplayerapp-main-43:/drawable/ic_close.xml"
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\xml_data_extraction_rules.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\xml\\data_extraction_rules.xml"
     },
     {
-        "merged": "com.videoplayerapp-merged_res-41:/drawable_ic_replay_5.xml.flat",
-        "source": "com.videoplayerapp-main-43:/drawable/ic_replay_5.xml"
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\layout-port_activity_player.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\layout-port\\activity_player.xml"
     },
     {
-        "merged": "com.videoplayerapp-merged_res-41:/xml_data_extraction_rules.xml.flat",
-        "source": "com.videoplayerapp-main-43:/xml/data_extraction_rules.xml"
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\drawable_ic_pause.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\drawable\\ic_pause.xml"
     },
     {
-        "merged": "com.videoplayerapp-merged_res-41:/layout_item_subtitle.xml.flat",
-        "source": "com.videoplayerapp-main-43:/layout/item_subtitle.xml"
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\xml_backup_rules.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\xml\\backup_rules.xml"
     },
     {
-        "merged": "com.videoplayerapp-merged_res-41:/layout_floating_player_layout.xml.flat",
-        "source": "com.videoplayerapp-main-43:/layout/floating_player_layout.xml"
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\layout_floating_player_layout.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\layout\\floating_player_layout.xml"
+    },
+    {
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\drawable_ic_replay_5.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\drawable\\ic_replay_5.xml"
     },
     {
         "merged": "com.videoplayerapp-merged_res-41:/layout-port_activity_player.xml.flat",
         "source": "com.videoplayerapp-main-43:/layout-port/activity_player.xml"
     },
     {
-        "merged": "com.videoplayerapp-merged_res-41:/drawable_ic_pause.xml.flat",
-        "source": "com.videoplayerapp-main-43:/drawable/ic_pause.xml"
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\drawable_floating_button_bg.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\drawable\\floating_button_bg.xml"
     },
     {
-        "merged": "com.videoplayerapp-merged_res-41:/drawable_floating_button_bg.xml.flat",
-        "source": "com.videoplayerapp-main-43:/drawable/floating_button_bg.xml"
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\drawable_ic_close.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\drawable\\ic_close.xml"
     },
     {
-        "merged": "com.videoplayerapp-merged_res-41:/drawable_ic_play.xml.flat",
-        "source": "com.videoplayerapp-main-43:/drawable/ic_play.xml"
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\layout_activity_player.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\layout\\activity_player.xml"
     },
     {
-        "merged": "com.videoplayerapp-merged_res-41:/drawable_ic_app_icon.xml.flat",
-        "source": "com.videoplayerapp-main-43:/drawable/ic_app_icon.xml"
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\drawable_ic_app_icon.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\drawable\\ic_app_icon.xml"
+    },
+    {
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\layout_item_subtitle.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\layout\\item_subtitle.xml"
+    },
+    {
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\xml_file_paths.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\xml\\file_paths.xml"
     },
     {
         "merged": "com.videoplayerapp-merged_res-41:/layout_activity_player.xml.flat",
         "source": "com.videoplayerapp-main-43:/layout/activity_player.xml"
     },
     {
-        "merged": "com.videoplayerapp-merged_res-41:/xml_backup_rules.xml.flat",
-        "source": "com.videoplayerapp-main-43:/xml/backup_rules.xml"
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\layout\\activity_main.xml"
     },
     {
-        "merged": "com.videoplayerapp-merged_res-41:/xml_file_paths.xml.flat",
-        "source": "com.videoplayerapp-main-43:/xml/file_paths.xml"
-    },
-    {
-        "merged": "com.videoplayerapp-merged_res-41:/layout_activity_main.xml.flat",
-        "source": "com.videoplayerapp-main-43:/layout/activity_main.xml"
+        "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-merged_res-41:\\drawable_ic_play.xml.flat",
+        "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\drawable\\ic_play.xml"
     }
 ]

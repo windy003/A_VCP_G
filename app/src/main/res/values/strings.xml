@@ -26,6 +26,11 @@
     <string name="floating_player_notification_title">Video Playing in Background</string>
     <string name="floating_player_notification_desc">Tap to return to player</string>
     
+    <!-- Quick Settings Tile -->
+    <string name="floating_window_tile_label">Floating Player</string>
+    <string name="floating_window_tile_active_description">Floating window is shown. Tap to hide.</string>
+    <string name="floating_window_tile_inactive_description">Floating window is hidden. Tap to show.</string>
+    
     <!-- Permissions -->
     <string name="overlay_permission_required">Overlay permission required for floating player</string>
     <string name="storage_permission_required">Storage permission required to access local files</string>

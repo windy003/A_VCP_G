@@ -73,6 +73,10 @@ class FloatingPlayerService : Service() {
         }
     }
     
+    fun isFloatingWindowShown(): Boolean {
+        return isFloatingWindowShown
+    }
+    
     private fun createFloatingWindow() {
         if (!canDrawOverlay()) return
         

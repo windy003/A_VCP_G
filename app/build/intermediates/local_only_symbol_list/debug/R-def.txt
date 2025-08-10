@@ -65,6 +65,9 @@ string error_video_file_not_accessible
 string floating_player_notification_channel
 string floating_player_notification_desc
 string floating_player_notification_title
+string floating_window_tile_active_description
+string floating_window_tile_inactive_description
+string floating_window_tile_label
 string help_button
 string hide_subtitles
 string overlay_permission_required

@@ -1,20 +1,20 @@
 -- Merging decision tree log ---
 provider#androidx.core.content.FileProvider
-INJECTED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:54:9-62:20
+INJECTED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:65:9-73:20
 	android:grantUriPermissions
-		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:58:13-47
+		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:69:13-47
 	android:authorities
 		INJECTED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml
-		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:56:13-64
+		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:67:13-64
 	android:exported
-		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:57:13-37
+		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:68:13-37
 	android:name
-		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:55:13-62
+		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:66:13-62
 manifest
-ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:2:1-66:12
-INJECTED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:2:1-66:12
-INJECTED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:2:1-66:12
-INJECTED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:2:1-66:12
+ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:2:1-77:12
+INJECTED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:2:1-77:12
+INJECTED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:2:1-77:12
+INJECTED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:2:1-77:12
 MERGED from [androidx.databinding:viewbinding:8.2.2] C:\Users\92892\.gradle\caches\9.0-milestone-1\transforms\625f68a00db373e3a52a675d5d3b9404\transformed\viewbinding-8.2.2\AndroidManifest.xml:2:1-7:12
 MERGED from [com.google.android.material:material:1.11.0] C:\Users\92892\.gradle\caches\9.0-milestone-1\transforms\03ed09fe46173020d11380788fe6839a\transformed\material-1.11.0\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] C:\Users\92892\.gradle\caches\9.0-milestone-1\transforms\adcaf0067b3ea2d648da0f195e4c7192\transformed\constraintlayout-2.1.4\AndroidManifest.xml:2:1-11:12
@@ -123,8 +123,8 @@ ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:19:5-92
 	android:name
 		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:19:22-89
 application
-ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:21:5-64:19
-INJECTED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:21:5-64:19
+ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:21:5-75:19
+INJECTED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:21:5-75:19
 MERGED from [com.google.android.material:material:1.11.0] C:\Users\92892\.gradle\caches\9.0-milestone-1\transforms\03ed09fe46173020d11380788fe6839a\transformed\material-1.11.0\AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.11.0] C:\Users\92892\.gradle\caches\9.0-milestone-1\transforms\03ed09fe46173020d11380788fe6839a\transformed\material-1.11.0\AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] C:\Users\92892\.gradle\caches\9.0-milestone-1\transforms\adcaf0067b3ea2d648da0f195e4c7192\transformed\constraintlayout-2.1.4\AndroidManifest.xml:9:5-20
@@ -201,12 +201,30 @@ ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:48:9-52:61
 		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:52:13-58
 	android:name
 		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:49:13-58
-meta-data#android.support.FILE_PROVIDER_PATHS
-ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:59:13-61:54
-	android:resource
-		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:61:17-51
+service#com.videoplayerapp.service.FloatingWindowTileService
+ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:54:9-63:19
+	android:label
+		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:58:13-63
+	android:exported
+		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:56:13-36
+	android:permission
+		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:59:13-77
+	android:icon
+		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:57:13-45
 	android:name
-		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:60:17-67
+		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:55:13-62
+intent-filter#action:name:android.service.quicksettings.action.QS_TILE
+ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:60:13-62:29
+action#android.service.quicksettings.action.QS_TILE
+ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:61:17-87
+	android:name
+		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:61:25-84
+meta-data#android.support.FILE_PROVIDER_PATHS
+ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:70:13-72:54
+	android:resource
+		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:72:17-51
+	android:name
+		ADDED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml:71:17-67
 uses-sdk
 INJECTED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from D:\files\projects\A_VCP_G\app\src\main\AndroidManifest.xml

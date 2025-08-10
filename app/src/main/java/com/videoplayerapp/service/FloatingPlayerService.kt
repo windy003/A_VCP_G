@@ -6,11 +6,15 @@ import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Binder
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.provider.Settings
 import android.view.*
 import android.widget.ImageButton
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.videoplayerapp.MainActivity
 import com.videoplayerapp.R
@@ -24,6 +28,8 @@ class FloatingPlayerService : Service() {
     private var player: ExoPlayer? = null
     private var isFloatingWindowShown = false
     private var layoutParams: WindowManager.LayoutParams? = null
+    private val notificationHandler = Handler(Looper.getMainLooper())
+    private var notificationUpdateRunnable: Runnable? = null
     
     private val binder = LocalBinder()
     
@@ -51,6 +57,20 @@ class FloatingPlayerService : Service() {
     
     fun setPlayer(exoPlayer: ExoPlayer?) {
         this.player = exoPlayer
+        if (exoPlayer != null) {
+            startNotificationUpdates()
+            exoPlayer.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    updateNotification()
+                }
+                
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    updateNotification()
+                }
+            })
+        } else {
+            stopNotificationUpdates()
+        }
     }
     
     fun showFloatingWindow() {
@@ -240,6 +260,32 @@ class FloatingPlayerService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         
+        player?.let { exoPlayer ->
+            val currentPosition = exoPlayer.currentPosition
+            val duration = exoPlayer.duration
+            val isPlaying = exoPlayer.isPlaying
+            
+            val currentTimeStr = formatTime(currentPosition)
+            val durationStr = if (duration > 0) formatTime(duration) else "--:--"
+            val progressPercent = if (duration > 0) {
+                ((currentPosition.toFloat() / duration.toFloat()) * 100).toInt()
+            } else 0
+            
+            val title = if (isPlaying) "正在播放视频" else "视频已暂停"
+            val text = "$currentTimeStr / $durationStr ($progressPercent%)"
+            
+            return NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setSmallIcon(if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
+                .setContentIntent(pendingIntent)
+                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setProgress(100, progressPercent, false)
+                .build()
+        }
+        
+        // Fallback notification when no player is available
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.floating_player_notification_title))
             .setContentText(getString(R.string.floating_player_notification_desc))
@@ -250,8 +296,48 @@ class FloatingPlayerService : Service() {
             .build()
     }
     
+    private fun updateNotification() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(NOTIFICATION_ID, createNotification())
+    }
+    
+    private fun startNotificationUpdates() {
+        stopNotificationUpdates()
+        notificationUpdateRunnable = object : Runnable {
+            override fun run() {
+                updateNotification()
+                notificationHandler.postDelayed(this, 1000) // Update every second
+            }
+        }
+        notificationHandler.post(notificationUpdateRunnable!!)
+    }
+    
+    private fun stopNotificationUpdates() {
+        notificationUpdateRunnable?.let { 
+            notificationHandler.removeCallbacks(it)
+            notificationUpdateRunnable = null
+        }
+    }
+    
+    private fun formatTime(timeMs: Long): String {
+        if (timeMs <= 0) return "00:00"
+        
+        val totalSeconds = timeMs / 1000
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        
+        return if (minutes >= 60) {
+            val hours = minutes / 60
+            val remainingMinutes = minutes % 60
+            String.format("%02d:%02d:%02d", hours, remainingMinutes, seconds)
+        } else {
+            String.format("%02d:%02d", minutes, seconds)
+        }
+    }
+    
     override fun onDestroy() {
         super.onDestroy()
+        stopNotificationUpdates()
         hideFloatingWindow()
     }
 }

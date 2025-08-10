@@ -47,6 +47,8 @@ class PlayerActivity : AppCompatActivity() {
     private var subtitleDelayMs = 0L
     private lateinit var sharedPreferences: SharedPreferences
     private var currentVideoId: String = ""
+    private var lastSavedPosition = 0L
+    private val savePositionInterval = 5000L // Save position every 5 seconds
     
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -158,6 +160,9 @@ class PlayerActivity : AppCompatActivity() {
         
         // Load saved subtitle offset for this video
         loadSubtitleOffset()
+        
+        // Load saved playback position
+        loadPlaybackPosition()
         
         // Create media source
         val mediaSource = createMediaSource(videoUrl, audioUrl)
@@ -355,14 +360,46 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
     
+    private fun savePlaybackPosition(position: Long) {
+        if (currentVideoId.isNotEmpty()) {
+            sharedPreferences.edit()
+                .putLong("position_$currentVideoId", position)
+                .apply()
+        }
+    }
+    
+    private fun loadPlaybackPosition() {
+        if (currentVideoId.isNotEmpty()) {
+            val savedPosition = sharedPreferences.getLong("position_$currentVideoId", 0L)
+            if (savedPosition > 0) {
+                // Seek to saved position when player is ready
+                exoPlayer?.addListener(object : Player.Listener {
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        if (playbackState == Player.STATE_READY) {
+                            exoPlayer?.seekTo(savedPosition)
+                            exoPlayer?.removeListener(this)
+                        }
+                    }
+                })
+            }
+        }
+    }
+    
     private fun startSubtitleUpdates() {
         updateRunnable = object : Runnable {
             override fun run() {
                 exoPlayer?.let { player ->
-                    val currentPosition = player.currentPosition + subtitleDelayMs
+                    val currentPosition = player.currentPosition
+                    val adjustedPosition = currentPosition + subtitleDelayMs
                     
-                    // Update current subtitle display
-                    val currentSubtitle = subtitles.find { it.isActiveAt(currentPosition) }
+                    // Save position periodically
+                    if (currentPosition > 0 && currentPosition - lastSavedPosition > savePositionInterval) {
+                        savePlaybackPosition(currentPosition)
+                        lastSavedPosition = currentPosition
+                    }
+                    
+                    // Update current subtitle display (with adjusted position for delay)
+                    val currentSubtitle = subtitles.find { it.isActiveAt(adjustedPosition) }
                     if (currentSubtitle != null) {
                         binding.subtitleView.text = currentSubtitle.text
                         binding.subtitleView.visibility = View.VISIBLE
@@ -370,8 +407,8 @@ class PlayerActivity : AppCompatActivity() {
                         binding.subtitleView.visibility = View.GONE
                     }
                     
-                    // Update subtitle panel
-                    subtitleAdapter?.updateActivePosition(currentPosition)
+                    // Update subtitle panel (with adjusted position for delay)
+                    subtitleAdapter?.updateActivePosition(adjustedPosition)
                 }
                 
                 updateHandler.postDelayed(this, 100) // Update every 100ms
@@ -441,8 +478,25 @@ class PlayerActivity : AppCompatActivity() {
         floatingService?.hideFloatingWindow()
     }
     
+    override fun onPause() {
+        super.onPause()
+        // Save current position when leaving the activity
+        exoPlayer?.let { player ->
+            if (player.currentPosition > 0) {
+                savePlaybackPosition(player.currentPosition)
+            }
+        }
+    }
+    
     override fun onDestroy() {
         super.onDestroy()
+        
+        // Save current position before destroying
+        exoPlayer?.let { player ->
+            if (player.currentPosition > 0) {
+                savePlaybackPosition(player.currentPosition)
+            }
+        }
         
         updateRunnable?.let { updateHandler.removeCallbacks(it) }
         

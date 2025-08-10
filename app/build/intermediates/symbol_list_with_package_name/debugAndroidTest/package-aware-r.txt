@@ -1,3 +1,0 @@
-com.videoplayerapp.test
-style WhiteBackgroundDialogTheme
-style WhiteBackgroundTheme

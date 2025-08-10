@@ -16,7 +16,6 @@
     <color name="subtitle_text">#FFFFFFFF</color>
     <color name="surface">#FFFBFDF7</color>
     <color name="white">#FFFFFFFF</color>
-    <item name="menu_translate_youdao" type="id"/>
     <string name="app_name">Video Player App</string>
     <string name="audio_source">Audio Source (Optional)</string>
     <string name="audio_url_hint">Enter audio URL or select local file (optional)</string>
@@ -44,8 +43,6 @@
     <string name="subtitle_help_text">Tap timestamp to jump to time, long press text to select</string>
     <string name="subtitle_panel_title">Video Transcript</string>
     <string name="subtitle_url_hint">Enter subtitle URL or select SRT file (optional)</string>
-    <string name="translate_with_youdao">有道翻译</string>
-    <string name="translation_failed">Translation failed</string>
     <string name="video_source">Video Source</string>
     <string name="video_url_hint">Enter video URL or select local file</string>
     <style name="FloatingButtonStyle">

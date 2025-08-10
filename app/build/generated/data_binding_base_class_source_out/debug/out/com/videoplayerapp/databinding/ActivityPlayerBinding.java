@@ -28,6 +28,12 @@ public final class ActivityPlayerBinding implements ViewBinding {
   public final ImageButton btnCloseSubtitlePanel;
 
   @NonNull
+  public final Button btnSubtitleDelayMinus;
+
+  @NonNull
+  public final Button btnSubtitleDelayPlus;
+
+  @NonNull
   public final Button btnSubtitlePanel;
 
   @NonNull
@@ -48,13 +54,19 @@ public final class ActivityPlayerBinding implements ViewBinding {
   @NonNull
   public final TextView subtitleView;
 
+  @NonNull
+  public final TextView tvSubtitleOffset;
+
   private ActivityPlayerBinding(@NonNull View rootView, @NonNull ImageButton btnCloseSubtitlePanel,
+      @NonNull Button btnSubtitleDelayMinus, @NonNull Button btnSubtitleDelayPlus,
       @NonNull Button btnSubtitlePanel, @NonNull LinearLayout controlsOverlay,
       @NonNull ProgressBar loadingIndicator, @NonNull PlayerView playerView,
       @NonNull LinearLayout subtitlePanel, @NonNull RecyclerView subtitleRecyclerView,
-      @NonNull TextView subtitleView) {
+      @NonNull TextView subtitleView, @NonNull TextView tvSubtitleOffset) {
     this.rootView = rootView;
     this.btnCloseSubtitlePanel = btnCloseSubtitlePanel;
+    this.btnSubtitleDelayMinus = btnSubtitleDelayMinus;
+    this.btnSubtitleDelayPlus = btnSubtitleDelayPlus;
     this.btnSubtitlePanel = btnSubtitlePanel;
     this.controlsOverlay = controlsOverlay;
     this.loadingIndicator = loadingIndicator;
@@ -62,6 +74,7 @@ public final class ActivityPlayerBinding implements ViewBinding {
     this.subtitlePanel = subtitlePanel;
     this.subtitleRecyclerView = subtitleRecyclerView;
     this.subtitleView = subtitleView;
+    this.tvSubtitleOffset = tvSubtitleOffset;
   }
 
   @Override
@@ -94,6 +107,18 @@ public final class ActivityPlayerBinding implements ViewBinding {
       id = R.id.btnCloseSubtitlePanel;
       ImageButton btnCloseSubtitlePanel = ViewBindings.findChildViewById(rootView, id);
       if (btnCloseSubtitlePanel == null) {
+        break missingId;
+      }
+
+      id = R.id.btnSubtitleDelayMinus;
+      Button btnSubtitleDelayMinus = ViewBindings.findChildViewById(rootView, id);
+      if (btnSubtitleDelayMinus == null) {
+        break missingId;
+      }
+
+      id = R.id.btnSubtitleDelayPlus;
+      Button btnSubtitleDelayPlus = ViewBindings.findChildViewById(rootView, id);
+      if (btnSubtitleDelayPlus == null) {
         break missingId;
       }
 
@@ -139,9 +164,15 @@ public final class ActivityPlayerBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityPlayerBinding(rootView, btnCloseSubtitlePanel, btnSubtitlePanel,
-          controlsOverlay, loadingIndicator, playerView, subtitlePanel, subtitleRecyclerView,
-          subtitleView);
+      id = R.id.tvSubtitleOffset;
+      TextView tvSubtitleOffset = ViewBindings.findChildViewById(rootView, id);
+      if (tvSubtitleOffset == null) {
+        break missingId;
+      }
+
+      return new ActivityPlayerBinding(rootView, btnCloseSubtitlePanel, btnSubtitleDelayMinus,
+          btnSubtitleDelayPlus, btnSubtitlePanel, controlsOverlay, loadingIndicator, playerView,
+          subtitlePanel, subtitleRecyclerView, subtitleView, tvSubtitleOffset);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

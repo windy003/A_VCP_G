@@ -20,8 +20,6 @@
     <string name="subtitle_panel_title">Video Transcript</string>
     <string name="subtitle_help_text">Tap timestamp to jump to time, long press text to select</string>
     <string name="subtitle_copied_to_clipboard">Subtitle copied</string>
-    <string name="translate_with_youdao">有道翻译</string>
-    <string name="translation_failed">Translation failed</string>
     
     <!-- Floating Window -->
     <string name="floating_player_notification_channel">Floating Player</string>

@@ -3368,6 +3368,8 @@ id btnRewind
 id btnSelectAudioFile
 id btnSelectSubtitleFile
 id btnSelectVideoFile
+id btnSubtitleDelayMinus
+id btnSubtitleDelayPlus
 id btnSubtitlePanel
 id buttonPanel
 id cache_measures
@@ -3599,7 +3601,6 @@ id material_value_index
 id matrix
 id media_actions
 id media_controller_compat_view_tag
-id menu_translate_youdao
 id message
 id middle
 id mini
@@ -3818,6 +3819,7 @@ id transition_scene_layoutid_cache
 id transition_transform
 id triangle
 id tvStatus
+id tvSubtitleOffset
 id tvSubtitleText
 id tvTimestamp
 id unchecked
@@ -4313,8 +4315,6 @@ string subtitle_copied_to_clipboard
 string subtitle_help_text
 string subtitle_panel_title
 string subtitle_url_hint
-string translate_with_youdao
-string translation_failed
 string video_source
 string video_url_hint
 style AlertDialog_AppCompat

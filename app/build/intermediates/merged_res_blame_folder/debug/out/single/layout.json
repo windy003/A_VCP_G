@@ -8,15 +8,15 @@
         "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\layout\\item_subtitle.xml"
     },
     {
+        "merged": "com.videoplayerapp-mergeDebugResources-40:/layout/activity_player.xml",
+        "source": "com.videoplayerapp-main-43:/layout/activity_player.xml"
+    },
+    {
         "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-mergeDebugResources-40:\\layout\\floating_player_layout.xml",
         "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\layout\\floating_player_layout.xml"
     },
     {
         "merged": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-mergeDebugResources-40:\\layout\\activity_main.xml",
         "source": "C:\\Users\\92892\\.gradle\\daemon\\9.0-milestone-1\\com.videoplayerapp-main-43:\\layout\\activity_main.xml"
-    },
-    {
-        "merged": "com.videoplayerapp-mergeDebugResources-40:/layout/activity_main.xml",
-        "source": "com.videoplayerapp-main-43:/layout/activity_main.xml"
     }
 ]

@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -31,6 +32,7 @@ import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
+import java.security.MessageDigest
 
 class PlayerActivity : AppCompatActivity() {
     
@@ -42,6 +44,9 @@ class PlayerActivity : AppCompatActivity() {
     private var isServiceBound = false
     private val updateHandler = Handler(Looper.getMainLooper())
     private var updateRunnable: Runnable? = null
+    private var subtitleDelayMs = 0L
+    private lateinit var sharedPreferences: SharedPreferences
+    private var currentVideoId: String = ""
     
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -66,8 +71,12 @@ class PlayerActivity : AppCompatActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         hideSystemUI()
         
+        // Initialize SharedPreferences
+        sharedPreferences = getSharedPreferences("subtitle_settings", Context.MODE_PRIVATE)
+        
         setupPlayer()
         setupUI()
+        updateSubtitleOffsetDisplay()
         loadContent()
         startFloatingService()
     }
@@ -128,6 +137,14 @@ class PlayerActivity : AppCompatActivity() {
             btnCloseSubtitlePanel.setOnClickListener {
                 hideSubtitlePanel()
             }
+            
+            btnSubtitleDelayPlus?.setOnClickListener {
+                adjustSubtitleDelay(300) // +0.3 seconds
+            }
+            
+            btnSubtitleDelayMinus?.setOnClickListener {
+                adjustSubtitleDelay(-300) // -0.3 seconds
+            }
         }
     }
     
@@ -135,6 +152,12 @@ class PlayerActivity : AppCompatActivity() {
         val videoUrl = intent.getStringExtra("video_url") ?: return
         val audioUrl = intent.getStringExtra("audio_url")
         val subtitleUrl = intent.getStringExtra("subtitle_url")
+        
+        // Generate unique ID for this video combination
+        currentVideoId = generateVideoId(videoUrl, audioUrl, subtitleUrl)
+        
+        // Load saved subtitle offset for this video
+        loadSubtitleOffset()
         
         // Create media source
         val mediaSource = createMediaSource(videoUrl, audioUrl)
@@ -280,8 +303,8 @@ class PlayerActivity : AppCompatActivity() {
     
     private fun setupSubtitleAdapter() {
         subtitleAdapter = SubtitleAdapter(subtitles) { subtitle ->
-            // Seek to subtitle time when clicked
-            exoPlayer?.seekTo(subtitle.startTime)
+            // Seek to subtitle time when clicked, accounting for delay offset
+            exoPlayer?.seekTo(subtitle.startTime - subtitleDelayMs)
         }
         
         binding.subtitleRecyclerView.apply {
@@ -290,11 +313,53 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
     
+    private fun adjustSubtitleDelay(delayMs: Long) {
+        subtitleDelayMs += delayMs
+        updateSubtitleOffsetDisplay()
+        saveSubtitleOffset()
+    }
+    
+    private fun updateSubtitleOffsetDisplay() {
+        val delaySeconds = subtitleDelayMs / 1000.0
+        val offsetText = when {
+            subtitleDelayMs > 0 -> "字幕: +${delaySeconds}s"
+            subtitleDelayMs < 0 -> "字幕: ${delaySeconds}s"
+            else -> "字幕: 0.0s"
+        }
+        binding.tvSubtitleOffset?.text = offsetText
+    }
+    
+    private fun generateVideoId(videoUrl: String, audioUrl: String?, subtitleUrl: String?): String {
+        val combined = "$videoUrl|${audioUrl ?: ""}|${subtitleUrl ?: ""}"
+        return try {
+            val digest = MessageDigest.getInstance("MD5")
+            val hash = digest.digest(combined.toByteArray())
+            hash.joinToString("") { "%02x".format(it) }
+        } catch (e: Exception) {
+            combined.hashCode().toString()
+        }
+    }
+    
+    private fun saveSubtitleOffset() {
+        if (currentVideoId.isNotEmpty()) {
+            sharedPreferences.edit()
+                .putLong("offset_$currentVideoId", subtitleDelayMs)
+                .apply()
+        }
+    }
+    
+    private fun loadSubtitleOffset() {
+        if (currentVideoId.isNotEmpty()) {
+            subtitleDelayMs = sharedPreferences.getLong("offset_$currentVideoId", 0L)
+            updateSubtitleOffsetDisplay()
+        }
+    }
+    
     private fun startSubtitleUpdates() {
         updateRunnable = object : Runnable {
             override fun run() {
                 exoPlayer?.let { player ->
-                    val currentPosition = player.currentPosition
+                    val currentPosition = player.currentPosition + subtitleDelayMs
                     
                     // Update current subtitle display
                     val currentSubtitle = subtitles.find { it.isActiveAt(currentPosition) }
@@ -329,7 +394,7 @@ class PlayerActivity : AppCompatActivity() {
         
         // Auto-scroll to current subtitle if playing
         exoPlayer?.let { player ->
-            val currentPosition = player.currentPosition
+            val currentPosition = player.currentPosition + subtitleDelayMs
             subtitleAdapter?.updateActivePosition(currentPosition)
         }
     }

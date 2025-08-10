@@ -40,9 +40,13 @@ id etSubtitleUrl
 id etVideoUrl
 id loadingIndicator
 id playerView
+id progressBarContainer
+id seekBarProgress
 id subtitlePanel
 id subtitleRecyclerView
 id subtitleView
+id tvCurrentTime
+id tvDuration
 id tvStatus
 id tvSubtitleOffset
 id tvSubtitleText

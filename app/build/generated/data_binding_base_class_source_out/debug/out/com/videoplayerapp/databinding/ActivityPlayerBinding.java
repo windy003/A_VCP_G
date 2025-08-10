@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -46,6 +47,12 @@ public final class ActivityPlayerBinding implements ViewBinding {
   public final PlayerView playerView;
 
   @NonNull
+  public final LinearLayout progressBarContainer;
+
+  @NonNull
+  public final SeekBar seekBarProgress;
+
+  @NonNull
   public final LinearLayout subtitlePanel;
 
   @NonNull
@@ -55,14 +62,22 @@ public final class ActivityPlayerBinding implements ViewBinding {
   public final TextView subtitleView;
 
   @NonNull
+  public final TextView tvCurrentTime;
+
+  @NonNull
+  public final TextView tvDuration;
+
+  @NonNull
   public final TextView tvSubtitleOffset;
 
   private ActivityPlayerBinding(@NonNull View rootView, @NonNull ImageButton btnCloseSubtitlePanel,
       @NonNull Button btnSubtitleDelayMinus, @NonNull Button btnSubtitleDelayPlus,
       @NonNull Button btnSubtitlePanel, @NonNull LinearLayout controlsOverlay,
       @NonNull ProgressBar loadingIndicator, @NonNull PlayerView playerView,
+      @NonNull LinearLayout progressBarContainer, @NonNull SeekBar seekBarProgress,
       @NonNull LinearLayout subtitlePanel, @NonNull RecyclerView subtitleRecyclerView,
-      @NonNull TextView subtitleView, @NonNull TextView tvSubtitleOffset) {
+      @NonNull TextView subtitleView, @NonNull TextView tvCurrentTime, @NonNull TextView tvDuration,
+      @NonNull TextView tvSubtitleOffset) {
     this.rootView = rootView;
     this.btnCloseSubtitlePanel = btnCloseSubtitlePanel;
     this.btnSubtitleDelayMinus = btnSubtitleDelayMinus;
@@ -71,9 +86,13 @@ public final class ActivityPlayerBinding implements ViewBinding {
     this.controlsOverlay = controlsOverlay;
     this.loadingIndicator = loadingIndicator;
     this.playerView = playerView;
+    this.progressBarContainer = progressBarContainer;
+    this.seekBarProgress = seekBarProgress;
     this.subtitlePanel = subtitlePanel;
     this.subtitleRecyclerView = subtitleRecyclerView;
     this.subtitleView = subtitleView;
+    this.tvCurrentTime = tvCurrentTime;
+    this.tvDuration = tvDuration;
     this.tvSubtitleOffset = tvSubtitleOffset;
   }
 
@@ -146,6 +165,18 @@ public final class ActivityPlayerBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.progressBarContainer;
+      LinearLayout progressBarContainer = ViewBindings.findChildViewById(rootView, id);
+      if (progressBarContainer == null) {
+        break missingId;
+      }
+
+      id = R.id.seekBarProgress;
+      SeekBar seekBarProgress = ViewBindings.findChildViewById(rootView, id);
+      if (seekBarProgress == null) {
+        break missingId;
+      }
+
       id = R.id.subtitlePanel;
       LinearLayout subtitlePanel = ViewBindings.findChildViewById(rootView, id);
       if (subtitlePanel == null) {
@@ -164,6 +195,18 @@ public final class ActivityPlayerBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.tvCurrentTime;
+      TextView tvCurrentTime = ViewBindings.findChildViewById(rootView, id);
+      if (tvCurrentTime == null) {
+        break missingId;
+      }
+
+      id = R.id.tvDuration;
+      TextView tvDuration = ViewBindings.findChildViewById(rootView, id);
+      if (tvDuration == null) {
+        break missingId;
+      }
+
       id = R.id.tvSubtitleOffset;
       TextView tvSubtitleOffset = ViewBindings.findChildViewById(rootView, id);
       if (tvSubtitleOffset == null) {
@@ -172,7 +215,8 @@ public final class ActivityPlayerBinding implements ViewBinding {
 
       return new ActivityPlayerBinding(rootView, btnCloseSubtitlePanel, btnSubtitleDelayMinus,
           btnSubtitleDelayPlus, btnSubtitlePanel, controlsOverlay, loadingIndicator, playerView,
-          subtitlePanel, subtitleRecyclerView, subtitleView, tvSubtitleOffset);
+          progressBarContainer, seekBarProgress, subtitlePanel, subtitleRecyclerView, subtitleView,
+          tvCurrentTime, tvDuration, tvSubtitleOffset);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

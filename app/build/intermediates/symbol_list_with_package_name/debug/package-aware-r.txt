@@ -3691,6 +3691,7 @@ id pooling_container_listener_holder_tag
 id position
 id postLayout
 id pressed
+id progressBarContainer
 id progress_circular
 id progress_horizontal
 id radio
@@ -3724,6 +3725,7 @@ id search_mag_icon
 id search_plate
 id search_src_text
 id search_voice_btn
+id seekBarProgress
 id select_dialog_listview
 id selected
 id selection_type
@@ -3818,6 +3820,8 @@ id transition_position
 id transition_scene_layoutid_cache
 id transition_transform
 id triangle
+id tvCurrentTime
+id tvDuration
 id tvStatus
 id tvSubtitleOffset
 id tvSubtitleText

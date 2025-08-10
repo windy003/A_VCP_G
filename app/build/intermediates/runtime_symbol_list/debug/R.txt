@@ -3690,6 +3690,7 @@ int id pooling_container_listener_holder_tag 0x7f0a01ab
 int id position 0x7f0a01ac
 int id postLayout 0x7f0a01ad
 int id pressed 0x7f0a01ae
+int id progressBarContainer 0x7f0a024c
 int id progress_circular 0x7f0a01af
 int id progress_horizontal 0x7f0a01b0
 int id radio 0x7f0a01b1
@@ -3723,6 +3724,7 @@ int id search_mag_icon 0x7f0a01cc
 int id search_plate 0x7f0a01cd
 int id search_src_text 0x7f0a01ce
 int id search_voice_btn 0x7f0a01cf
+int id seekBarProgress 0x7f0a024d
 int id select_dialog_listview 0x7f0a01d0
 int id selected 0x7f0a01d1
 int id selection_type 0x7f0a01d2
@@ -3817,6 +3819,8 @@ int id transition_position 0x7f0a022a
 int id transition_scene_layoutid_cache 0x7f0a022b
 int id transition_transform 0x7f0a022c
 int id triangle 0x7f0a022d
+int id tvCurrentTime 0x7f0a024e
+int id tvDuration 0x7f0a024f
 int id tvStatus 0x7f0a022e
 int id tvSubtitleOffset 0x7f0a024b
 int id tvSubtitleText 0x7f0a022f

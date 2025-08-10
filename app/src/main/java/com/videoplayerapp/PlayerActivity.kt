@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.view.View
 import android.view.WindowManager
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -47,6 +48,9 @@ class PlayerActivity : AppCompatActivity() {
     private var subtitleDelayMs = 0L
     private lateinit var sharedPreferences: SharedPreferences
     private var currentVideoId: String = ""
+    private var isSeekBarTracking = false
+    private var lastSavedPosition = 0L
+    private val savePositionInterval = 5000L // Save position every 5 seconds
     
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -126,6 +130,7 @@ class PlayerActivity : AppCompatActivity() {
         }
         
         binding.playerView.player = exoPlayer
+        binding.playerView.useController = false // Hide default controls
     }
     
     private fun setupUI() {
@@ -145,7 +150,41 @@ class PlayerActivity : AppCompatActivity() {
             btnSubtitleDelayMinus?.setOnClickListener {
                 adjustSubtitleDelay(-300) // -0.3 seconds
             }
+            
+            setupSeekBar()
         }
+    }
+    
+    private fun setupSeekBar() {
+        binding.seekBarProgress?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    exoPlayer?.let { player ->
+                        val duration = player.duration
+                        if (duration > 0) {
+                            val position = (duration * progress) / 1000L
+                            binding.tvCurrentTime?.text = formatTime(position)
+                        }
+                    }
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                isSeekBarTracking = true
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                isSeekBarTracking = false
+                exoPlayer?.let { player ->
+                    val duration = player.duration
+                    if (duration > 0) {
+                        val position = (duration * (seekBar?.progress ?: 0)) / 1000L
+                        player.seekTo(position)
+                        savePlaybackPosition(position)
+                    }
+                }
+            }
+        })
     }
     
     private fun loadContent() {
@@ -158,6 +197,9 @@ class PlayerActivity : AppCompatActivity() {
         
         // Load saved subtitle offset for this video
         loadSubtitleOffset()
+        
+        // Load saved playback position
+        loadPlaybackPosition()
         
         // Create media source
         val mediaSource = createMediaSource(videoUrl, audioUrl)
@@ -355,14 +397,71 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
     
+    private fun savePlaybackPosition(position: Long) {
+        if (currentVideoId.isNotEmpty()) {
+            sharedPreferences.edit()
+                .putLong("position_$currentVideoId", position)
+                .apply()
+        }
+    }
+    
+    private fun loadPlaybackPosition() {
+        if (currentVideoId.isNotEmpty()) {
+            val savedPosition = sharedPreferences.getLong("position_$currentVideoId", 0L)
+            if (savedPosition > 0) {
+                // Seek to saved position when player is ready
+                exoPlayer?.addListener(object : Player.Listener {
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        if (playbackState == Player.STATE_READY) {
+                            exoPlayer?.seekTo(savedPosition)
+                            exoPlayer?.removeListener(this)
+                        }
+                    }
+                })
+            }
+        }
+    }
+    
+    private fun formatTime(timeMs: Long): String {
+        if (timeMs <= 0) return "00:00"
+        
+        val totalSeconds = timeMs / 1000
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        
+        return if (minutes >= 60) {
+            val hours = minutes / 60
+            val remainingMinutes = minutes % 60
+            String.format("%02d:%02d:%02d", hours, remainingMinutes, seconds)
+        } else {
+            String.format("%02d:%02d", minutes, seconds)
+        }
+    }
+    
     private fun startSubtitleUpdates() {
         updateRunnable = object : Runnable {
             override fun run() {
                 exoPlayer?.let { player ->
-                    val currentPosition = player.currentPosition + subtitleDelayMs
+                    val currentPosition = player.currentPosition
+                    val adjustedPosition = currentPosition + subtitleDelayMs
+                    val duration = player.duration
                     
-                    // Update current subtitle display
-                    val currentSubtitle = subtitles.find { it.isActiveAt(currentPosition) }
+                    // Update progress bar (only if not being dragged)
+                    if (!isSeekBarTracking && duration > 0) {
+                        val progress = ((currentPosition * 1000) / duration).toInt()
+                        binding.seekBarProgress?.progress = progress
+                        binding.tvCurrentTime?.text = formatTime(currentPosition)
+                        binding.tvDuration?.text = formatTime(duration)
+                        
+                        // Save position periodically
+                        if (currentPosition - lastSavedPosition > savePositionInterval) {
+                            savePlaybackPosition(currentPosition)
+                            lastSavedPosition = currentPosition
+                        }
+                    }
+                    
+                    // Update current subtitle display (with adjusted position)
+                    val currentSubtitle = subtitles.find { it.isActiveAt(adjustedPosition) }
                     if (currentSubtitle != null) {
                         binding.subtitleView.text = currentSubtitle.text
                         binding.subtitleView.visibility = View.VISIBLE
@@ -370,8 +469,8 @@ class PlayerActivity : AppCompatActivity() {
                         binding.subtitleView.visibility = View.GONE
                     }
                     
-                    // Update subtitle panel
-                    subtitleAdapter?.updateActivePosition(currentPosition)
+                    // Update subtitle panel (with adjusted position)
+                    subtitleAdapter?.updateActivePosition(adjustedPosition)
                 }
                 
                 updateHandler.postDelayed(this, 100) // Update every 100ms
@@ -439,6 +538,16 @@ class PlayerActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         floatingService?.hideFloatingWindow()
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // Save current position when leaving the activity
+        exoPlayer?.let { player ->
+            if (player.currentPosition > 0) {
+                savePlaybackPosition(player.currentPosition)
+            }
+        }
     }
     
     override fun onDestroy() {

@@ -273,7 +273,10 @@ class FloatingPlayerService : Service() {
                 // Update time text
                 val currentTimeStr = formatTime(currentPosition)
                 val durationStr = if (duration > 0) formatTime(duration) else "00:00"
-                tvTimeInfo?.text = "$currentTimeStr / $durationStr"
+                val progressPercent = if (duration > 0) {
+                    ((currentPosition.toFloat() / duration.toFloat()) * 100).toInt()
+                } else 0
+                tvTimeInfo?.text = "$currentTimeStr / $durationStr ($progressPercent%)"
                 
                 // Update play/pause button
                 updatePlayPauseButton(btnPlayPause)

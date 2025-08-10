@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
@@ -28,12 +29,17 @@ public final class FloatingPlayerLayoutBinding implements ViewBinding {
   @NonNull
   public final ImageButton btnRewind;
 
+  @NonNull
+  public final ProgressBar progressBar;
+
   private FloatingPlayerLayoutBinding(@NonNull LinearLayout rootView, @NonNull ImageButton btnClose,
-      @NonNull ImageButton btnPlayPause, @NonNull ImageButton btnRewind) {
+      @NonNull ImageButton btnPlayPause, @NonNull ImageButton btnRewind,
+      @NonNull ProgressBar progressBar) {
     this.rootView = rootView;
     this.btnClose = btnClose;
     this.btnPlayPause = btnPlayPause;
     this.btnRewind = btnRewind;
+    this.progressBar = progressBar;
   }
 
   @Override
@@ -81,8 +87,14 @@ public final class FloatingPlayerLayoutBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.progressBar;
+      ProgressBar progressBar = ViewBindings.findChildViewById(rootView, id);
+      if (progressBar == null) {
+        break missingId;
+      }
+
       return new FloatingPlayerLayoutBinding((LinearLayout) rootView, btnClose, btnPlayPause,
-          btnRewind);
+          btnRewind, progressBar);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

@@ -3690,6 +3690,7 @@ int id pooling_container_listener_holder_tag 0x7f0a01ab
 int id position 0x7f0a01ac
 int id postLayout 0x7f0a01ad
 int id pressed 0x7f0a01ae
+int id progressBar 0x7f0a024c
 int id progress_circular 0x7f0a01af
 int id progress_horizontal 0x7f0a01b0
 int id radio 0x7f0a01b1

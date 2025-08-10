@@ -40,6 +40,7 @@ id etSubtitleUrl
 id etVideoUrl
 id loadingIndicator
 id playerView
+id progressBar
 id subtitlePanel
 id subtitleRecyclerView
 id subtitleView

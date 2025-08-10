@@ -12,6 +12,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.view.*
 import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.media3.common.Player
@@ -30,6 +31,8 @@ class FloatingPlayerService : Service() {
     private var layoutParams: WindowManager.LayoutParams? = null
     private val notificationHandler = Handler(Looper.getMainLooper())
     private var notificationUpdateRunnable: Runnable? = null
+    private val floatingWindowHandler = Handler(Looper.getMainLooper())
+    private var floatingWindowUpdateRunnable: Runnable? = null
     
     private val binder = LocalBinder()
     
@@ -80,11 +83,13 @@ class FloatingPlayerService : Service() {
         
         createFloatingWindow()
         isFloatingWindowShown = true
+        startFloatingWindowUpdates()
     }
     
     fun hideFloatingWindow() {
         if (!isFloatingWindowShown) return
         
+        stopFloatingWindowUpdates()
         try {
             floatingView?.let { view ->
                 windowManager?.removeView(view)
@@ -228,6 +233,47 @@ class FloatingPlayerService : Service() {
         })
     }
     
+    private fun startFloatingWindowUpdates() {
+        stopFloatingWindowUpdates()
+        floatingWindowUpdateRunnable = object : Runnable {
+            override fun run() {
+                updateFloatingWindowProgress()
+                floatingWindowHandler.postDelayed(this, 1000) // Update every second
+            }
+        }
+        floatingWindowHandler.post(floatingWindowUpdateRunnable!!)
+    }
+    
+    private fun stopFloatingWindowUpdates() {
+        floatingWindowUpdateRunnable?.let { 
+            floatingWindowHandler.removeCallbacks(it)
+            floatingWindowUpdateRunnable = null
+        }
+    }
+    
+    private fun updateFloatingWindowProgress() {
+        floatingView?.let { view ->
+            val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
+            val btnPlayPause = view.findViewById<ImageButton>(R.id.btnPlayPause)
+            
+            player?.let { exoPlayer ->
+                val currentPosition = exoPlayer.currentPosition
+                val duration = exoPlayer.duration
+                
+                // Update progress bar
+                if (duration > 0) {
+                    val progressPercent = ((currentPosition.toFloat() / duration.toFloat()) * 100).toInt()
+                    progressBar?.progress = progressPercent
+                } else {
+                    progressBar?.progress = 0
+                }
+                
+                // Update play/pause button
+                updatePlayPauseButton(btnPlayPause)
+            }
+        }
+    }
+    
     
     private fun canDrawOverlay(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -338,6 +384,7 @@ class FloatingPlayerService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         stopNotificationUpdates()
+        stopFloatingWindowUpdates()
         hideFloatingWindow()
     }
 }

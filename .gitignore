@@ -2,3 +2,4 @@ build/
 .gradle/
 app/build/
 .claude/
+.idea/

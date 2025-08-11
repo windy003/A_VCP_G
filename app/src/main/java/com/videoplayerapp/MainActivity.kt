@@ -395,7 +395,10 @@ class MainActivity : AppCompatActivity() {
             Log.d("MainActivity", "All strategies failed for $type: clearing data")
             clearFileInfo(type)
         } else {
-            Log.d("MainActivity", "No saved data for $type")
+            Log.d("MainActivity", "No saved data for $type - keeping field empty")
+            // For audio and subtitle, if no data is saved, keep the field empty
+            // For video, this should not happen as video is required
+            editText.setText("")
         }
     }
     
@@ -511,9 +514,15 @@ class MainActivity : AppCompatActivity() {
         }
         if (audioText.isNotEmpty()) {
             saveFileInfo("audio", audioText, null, null)
+        } else {
+            // Clear audio data if field is empty
+            clearFileInfo("audio")
         }
         if (subtitleText.isNotEmpty()) {
             saveFileInfo("subtitle", subtitleText, null, null)
+        } else {
+            // Clear subtitle data if field is empty
+            clearFileInfo("subtitle")
         }
     }
     

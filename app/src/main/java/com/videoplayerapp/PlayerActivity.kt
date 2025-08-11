@@ -107,7 +107,9 @@ class PlayerActivity : AppCompatActivity() {
                             binding.loadingIndicator.visibility = View.VISIBLE
                         }
                         Player.STATE_ENDED -> {
-                            // Video ended
+                            // Video ended - restart for loop playback
+                            exoPlayer?.seekTo(0)
+                            exoPlayer?.playWhenReady = true
                         }
                     }
                 }

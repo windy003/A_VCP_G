@@ -22,9 +22,6 @@
     <string name="subtitle_copied_to_clipboard">Subtitle copied</string>
     
     <!-- Floating Window -->
-    <string name="floating_player_notification_channel">Floating Player</string>
-    <string name="floating_player_notification_title">Video Playing in Background</string>
-    <string name="floating_player_notification_desc">Tap to return to player</string>
     
     <!-- Quick Settings Tile -->
     <string name="floating_window_tile_label">Floating Player</string>

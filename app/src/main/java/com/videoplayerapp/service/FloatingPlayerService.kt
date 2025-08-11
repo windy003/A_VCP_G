@@ -1,6 +1,6 @@
 package com.videoplayerapp.service
 
-import android.app.*
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
@@ -13,12 +13,9 @@ import android.provider.Settings
 import android.view.*
 import android.widget.ImageButton
 import android.widget.ProgressBar
-import android.widget.RemoteViews
 import android.widget.TextView
-import androidx.core.app.NotificationCompat
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import com.videoplayerapp.MainActivity
 import com.videoplayerapp.R
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -30,8 +27,6 @@ class FloatingPlayerService : Service() {
     private var player: ExoPlayer? = null
     private var isFloatingWindowShown = false
     private var layoutParams: WindowManager.LayoutParams? = null
-    private val notificationHandler = Handler(Looper.getMainLooper())
-    private var notificationUpdateRunnable: Runnable? = null
     private val floatingWindowHandler = Handler(Looper.getMainLooper())
     private var floatingWindowUpdateRunnable: Runnable? = null
     
@@ -42,46 +37,37 @@ class FloatingPlayerService : Service() {
     }
     
     companion object {
-        private const val NOTIFICATION_ID = 1
-        private const val CHANNEL_ID = "floating_player_channel"
+        // Companion object kept for future constants if needed
     }
     
     override fun onBind(intent: Intent?): IBinder = binder
     
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
     }
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(NOTIFICATION_ID, createNotification())
         return START_STICKY
     }
     
     fun setPlayer(exoPlayer: ExoPlayer?) {
         this.player = exoPlayer
         if (exoPlayer != null) {
-            startNotificationUpdates()
             exoPlayer.addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(playbackState: Int) {
-                    updateNotification()
                     updateFloatingWindowProgress() // 立即更新悬浮窗进度
                 }
                 
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    updateNotification()
                     updateFloatingWindowProgress() // 立即更新悬浮窗进度
                 }
                 
                 override fun onPositionDiscontinuity(oldPosition: androidx.media3.common.Player.PositionInfo, newPosition: androidx.media3.common.Player.PositionInfo, reason: Int) {
                     // 当播放位置发生跳跃时（如用户拖动进度条），立即同步悬浮窗
                     updateFloatingWindowProgress()
-                    updateNotification()
                 }
             })
-        } else {
-            stopNotificationUpdates()
         }
     }
     
@@ -118,7 +104,6 @@ class FloatingPlayerService : Service() {
     
     fun forceUpdateProgress() {
         updateFloatingWindowProgress()
-        updateNotification()
     }
     
     private fun createFloatingWindow() {
@@ -312,87 +297,10 @@ class FloatingPlayerService : Service() {
         }
     }
     
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                getString(R.string.floating_player_notification_channel),
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "Notification channel for floating video player"
-                setShowBadge(false)
-            }
-            
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
     
-    private fun createNotification(): Notification {
-        val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, notificationIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        player?.let { exoPlayer ->
-            val currentPosition = exoPlayer.currentPosition
-            val duration = exoPlayer.duration
-            val isPlaying = exoPlayer.isPlaying
-            
-            val currentTimeStr = formatTime(currentPosition)
-            val durationStr = if (duration > 0) formatTime(duration) else "--:--"
-            val progressPercent = if (duration > 0) {
-                ((currentPosition.toFloat() / duration.toFloat()) * 100).toInt()
-            } else 0
-            
-            val title = if (isPlaying) "正在播放视频" else "视频已暂停"
-            val text = "$currentTimeStr / $durationStr ($progressPercent%)"
-            
-            return NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setSmallIcon(if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
-                .setContentIntent(pendingIntent)
-                .setOngoing(true)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setProgress(100, progressPercent, false)
-                .build()
-        }
-        
-        // Fallback notification when no player is available
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(getString(R.string.floating_player_notification_title))
-            .setContentText(getString(R.string.floating_player_notification_desc))
-            .setSmallIcon(R.drawable.ic_play)
-            .setContentIntent(pendingIntent)
-            .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .build()
-    }
     
-    private fun updateNotification() {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(NOTIFICATION_ID, createNotification())
-    }
     
-    private fun startNotificationUpdates() {
-        stopNotificationUpdates()
-        notificationUpdateRunnable = object : Runnable {
-            override fun run() {
-                updateNotification()
-                notificationHandler.postDelayed(this, 1000) // Update every second
-            }
-        }
-        notificationHandler.post(notificationUpdateRunnable!!)
-    }
     
-    private fun stopNotificationUpdates() {
-        notificationUpdateRunnable?.let { 
-            notificationHandler.removeCallbacks(it)
-            notificationUpdateRunnable = null
-        }
-    }
     
     private fun formatTime(timeMs: Long): String {
         if (timeMs <= 0) return "00:00"
@@ -412,7 +320,6 @@ class FloatingPlayerService : Service() {
     
     override fun onDestroy() {
         super.onDestroy()
-        stopNotificationUpdates()
         stopFloatingWindowUpdates()
         hideFloatingWindow()
     }

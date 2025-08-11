@@ -55,7 +55,10 @@ class PlayerActivity : AppCompatActivity() {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as FloatingPlayerService.LocalBinder
             floatingService = binder.getService()
-            floatingService?.setPlayer(exoPlayer)
+            // 确保服务获得正确的播放器引用，并立即同步状态
+            exoPlayer?.let { player ->
+                floatingService?.setPlayer(player)
+            }
             isServiceBound = true
         }
         
@@ -102,6 +105,8 @@ class PlayerActivity : AppCompatActivity() {
                     when (playbackState) {
                         Player.STATE_READY -> {
                             binding.loadingIndicator.visibility = View.GONE
+                            // 确保悬浮窗服务获得最新的播放器引用
+                            floatingService?.setPlayer(this@apply)
                         }
                         Player.STATE_BUFFERING -> {
                             binding.loadingIndicator.visibility = View.VISIBLE
@@ -111,6 +116,13 @@ class PlayerActivity : AppCompatActivity() {
                             exoPlayer?.seekTo(0)
                             exoPlayer?.playWhenReady = true
                         }
+                    }
+                }
+                
+                override fun onPositionDiscontinuity(oldPosition: androidx.media3.common.Player.PositionInfo, newPosition: androidx.media3.common.Player.PositionInfo, reason: Int) {
+                    // 当播放位置发生跳跃时，确保悬浮窗立即同步
+                    floatingService?.let { service ->
+                        service.setPlayer(this@apply) // 重新设置播放器确保同步
                     }
                 }
                 
@@ -496,6 +508,8 @@ class PlayerActivity : AppCompatActivity() {
     
     override fun onStop() {
         super.onStop()
+        // 在显示悬浮窗之前强制同步进度
+        floatingService?.forceUpdateProgress()
         floatingService?.showFloatingWindow()
     }
     

@@ -66,9 +66,17 @@ class FloatingPlayerService : Service() {
             exoPlayer.addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     updateNotification()
+                    updateFloatingWindowProgress() // 立即更新悬浮窗进度
                 }
                 
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    updateNotification()
+                    updateFloatingWindowProgress() // 立即更新悬浮窗进度
+                }
+                
+                override fun onPositionDiscontinuity(oldPosition: androidx.media3.common.Player.PositionInfo, newPosition: androidx.media3.common.Player.PositionInfo, reason: Int) {
+                    // 当播放位置发生跳跃时（如用户拖动进度条），立即同步悬浮窗
+                    updateFloatingWindowProgress()
                     updateNotification()
                 }
             })
@@ -84,6 +92,8 @@ class FloatingPlayerService : Service() {
         
         createFloatingWindow()
         isFloatingWindowShown = true
+        // 立即更新一次进度，确保悬浮窗显示最新状态
+        updateFloatingWindowProgress()
         startFloatingWindowUpdates()
     }
     
@@ -104,6 +114,11 @@ class FloatingPlayerService : Service() {
     
     fun isFloatingWindowShown(): Boolean {
         return isFloatingWindowShown
+    }
+    
+    fun forceUpdateProgress() {
+        updateFloatingWindowProgress()
+        updateNotification()
     }
     
     private fun createFloatingWindow() {
@@ -239,7 +254,7 @@ class FloatingPlayerService : Service() {
         floatingWindowUpdateRunnable = object : Runnable {
             override fun run() {
                 updateFloatingWindowProgress()
-                floatingWindowHandler.postDelayed(this, 1000) // Update every second
+                floatingWindowHandler.postDelayed(this, 500) // Update every 0.5 second for better sync
             }
         }
         floatingWindowHandler.post(floatingWindowUpdateRunnable!!)

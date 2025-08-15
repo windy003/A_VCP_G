@@ -14,6 +14,7 @@ import android.view.*
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ProgressBar
+import android.widget.SeekBar
 import android.widget.TextView
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -144,6 +145,7 @@ class FloatingPlayerService : Service() {
             val btnRewind = view.findViewById<ImageButton>(R.id.btnRewind)
             val btnClose = view.findViewById<ImageButton>(R.id.btnClose)
             val etNotes = view.findViewById<EditText>(R.id.etNotes)
+            val seekBar = view.findViewById<SeekBar>(R.id.seekBar)
             
             // Setup draggable buttons with click functionality
             setupDraggableButton(btnPlayPause) {
@@ -169,6 +171,44 @@ class FloatingPlayerService : Service() {
             setupDraggableButton(btnClose) {
                 hideFloatingWindow()
             }
+            
+            // Setup seekBar for draggable progress control
+            seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                private var userIsSeeking = false
+                
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    // Only update if user is dragging, not from programmatic updates
+                    if (fromUser && userIsSeeking) {
+                        player?.let { exoPlayer ->
+                            val duration = exoPlayer.duration
+                            if (duration > 0) {
+                                val newPosition = (duration * progress / 100).toLong()
+                                // Update time display immediately for smooth feedback
+                                updateTimeDisplay(newPosition, duration)
+                            }
+                        }
+                    }
+                }
+                
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                    userIsSeeking = true
+                    // Pause progress updates while user is dragging
+                    stopFloatingWindowUpdates()
+                }
+                
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    userIsSeeking = false
+                    player?.let { exoPlayer ->
+                        val duration = exoPlayer.duration
+                        if (duration > 0) {
+                            val newPosition = (duration * (seekBar?.progress ?: 0) / 100).toLong()
+                            exoPlayer.seekTo(newPosition)
+                        }
+                    }
+                    // Resume progress updates
+                    startFloatingWindowUpdates()
+                }
+            })
             
             // Setup notes EditText
             etNotes?.setOnFocusChangeListener { _, hasFocus ->
@@ -269,7 +309,7 @@ class FloatingPlayerService : Service() {
     
     private fun updateFloatingWindowProgress() {
         floatingView?.let { view ->
-            val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
+            val seekBar = view.findViewById<SeekBar>(R.id.seekBar)
             val btnPlayPause = view.findViewById<ImageButton>(R.id.btnPlayPause)
             val tvTimeInfo = view.findViewById<TextView>(R.id.tvTimeInfo)
             
@@ -277,29 +317,37 @@ class FloatingPlayerService : Service() {
                 val currentPosition = exoPlayer.currentPosition
                 val duration = exoPlayer.duration
                 
-                // Update progress bar
+                // Update seek bar (only if user is not currently dragging)
                 if (duration > 0) {
                     val progressPercent = ((currentPosition.toFloat() / duration.toFloat()) * 100).toInt()
-                    progressBar?.progress = progressPercent
+                    seekBar?.progress = progressPercent
                 } else {
-                    progressBar?.progress = 0
+                    seekBar?.progress = 0
                 }
                 
                 // Update time text
-                val currentTimeStr = formatTime(currentPosition)
-                val durationStr = if (duration > 0) formatTime(duration) else "00:00"
-                val progressPercent = if (duration > 0) {
-                    ((currentPosition.toFloat() / duration.toFloat()) * 100).toInt()
-                } else 0
-                tvTimeInfo?.text = "$currentTimeStr / $durationStr ($progressPercent%)"
+                updateTimeDisplay(currentPosition, duration)
                 
                 // Update play/pause button
                 updatePlayPauseButton(btnPlayPause)
             } ?: run {
                 // When no player is available, show default time
+                val tvTimeInfo = view.findViewById<TextView>(R.id.tvTimeInfo)
                 tvTimeInfo?.text = "00:00 / 00:00"
-                progressBar?.progress = 0
+                seekBar?.progress = 0
             }
+        }
+    }
+    
+    private fun updateTimeDisplay(currentPosition: Long, duration: Long) {
+        floatingView?.let { view ->
+            val tvTimeInfo = view.findViewById<TextView>(R.id.tvTimeInfo)
+            val currentTimeStr = formatTime(currentPosition)
+            val durationStr = if (duration > 0) formatTime(duration) else "00:00"
+            val progressPercent = if (duration > 0) {
+                ((currentPosition.toFloat() / duration.toFloat()) * 100).toInt()
+            } else 0
+            tvTimeInfo?.text = "$currentTimeStr / $durationStr ($progressPercent%)"
         }
     }
     

@@ -53,13 +53,13 @@
             android:fontFamily="monospace" />
         
         <!-- 播放进度条 -->
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyleHorizontal"
+        <SeekBar
+            android:id="@+id/seekBar"
             android:layout_width="match_parent"
-            android:layout_height="4dp"
+            android:layout_height="wrap_content"
             android:progressTint="#FF4081"
             android:progressBackgroundTint="#33FFFFFF"
+            android:thumbTint="#FF4081"
             android:max="100"
             android:progress="0" />
             

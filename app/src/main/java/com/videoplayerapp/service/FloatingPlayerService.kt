@@ -3,6 +3,7 @@ package com.videoplayerapp.service
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.PixelFormat
 import android.os.Binder
 import android.os.Build
@@ -10,6 +11,8 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.*
 import android.widget.EditText
 import android.widget.ImageButton
@@ -31,6 +34,7 @@ class FloatingPlayerService : Service() {
     private var layoutParams: WindowManager.LayoutParams? = null
     private val floatingWindowHandler = Handler(Looper.getMainLooper())
     private var floatingWindowUpdateRunnable: Runnable? = null
+    private lateinit var sharedPreferences: SharedPreferences
     
     private val binder = LocalBinder()
     
@@ -39,7 +43,8 @@ class FloatingPlayerService : Service() {
     }
     
     companion object {
-        // Companion object kept for future constants if needed
+        private const val PREFS_NAME = "floating_notes_prefs"
+        private const val KEY_NOTES_CONTENT = "notes_content"
     }
     
     override fun onBind(intent: Intent?): IBinder = binder
@@ -47,6 +52,7 @@ class FloatingPlayerService : Service() {
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -211,16 +217,37 @@ class FloatingPlayerService : Service() {
             })
             
             // Setup notes EditText
-            etNotes?.setOnFocusChangeListener { _, hasFocus ->
-                layoutParams?.let { params ->
-                    if (hasFocus) {
-                        // Allow input when focused
-                        params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
-                    } else {
-                        // Prevent accidental input when not focused
-                        params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+            etNotes?.let { notesEditText ->
+                // Load saved notes content
+                val savedNotes = sharedPreferences.getString(KEY_NOTES_CONTENT, "")
+                notesEditText.setText(savedNotes)
+                
+                // Setup real-time saving
+                notesEditText.addTextChangedListener(object : TextWatcher {
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                    
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                    
+                    override fun afterTextChanged(s: Editable?) {
+                        // Save notes content in real-time
+                        val content = s?.toString() ?: ""
+                        sharedPreferences.edit()
+                            .putString(KEY_NOTES_CONTENT, content)
+                            .apply()
                     }
-                    windowManager?.updateViewLayout(floatingView, params)
+                })
+                
+                notesEditText.setOnFocusChangeListener { _, hasFocus ->
+                    layoutParams?.let { params ->
+                        if (hasFocus) {
+                            // Allow input when focused
+                            params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
+                        } else {
+                            // Prevent accidental input when not focused
+                            params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        }
+                        windowManager?.updateViewLayout(floatingView, params)
+                    }
                 }
             }
             

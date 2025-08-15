@@ -318,6 +318,8 @@ class PlayerActivity : AppCompatActivity() {
     private fun loadSubtitles(subtitleUrl: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                android.util.Log.d("SubtitleLoader", "Loading subtitles from: $subtitleUrl")
+                
                 val inputStream = if (subtitleUrl.startsWith("http")) {
                     // Load from URL
                     val client = OkHttpClient()
@@ -331,22 +333,71 @@ class PlayerActivity : AppCompatActivity() {
                     response.body?.byteStream() ?: throw IOException("Empty response body")
                 } else {
                     // Load from local file/content URI
-                    contentResolver.openInputStream(Uri.parse(subtitleUrl))
-                        ?: throw IOException("Cannot open subtitle file")
+                    android.util.Log.d("SubtitleLoader", "Opening local file: $subtitleUrl")
+                    val uri = Uri.parse(subtitleUrl)
+                    
+                    // Try different methods to open the file
+                    when {
+                        subtitleUrl.startsWith("content://") -> {
+                            // Content URI from system file picker
+                            contentResolver.openInputStream(uri)
+                        }
+                        subtitleUrl.startsWith("file://") -> {
+                            // File URI from third-party apps - try multiple approaches
+                            try {
+                                // Method 1: Try ContentResolver first
+                                contentResolver.openInputStream(uri)
+                            } catch (e: Exception) {
+                                android.util.Log.d("SubtitleLoader", "ContentResolver failed, trying direct file access")
+                                try {
+                                    // Method 2: Try direct file access
+                                    val path = uri.path ?: throw IOException("Invalid file path")
+                                    java.io.FileInputStream(java.io.File(path))
+                                } catch (e2: Exception) {
+                                    android.util.Log.d("SubtitleLoader", "Direct file access failed, trying DocumentFile")
+                                    // Method 3: Try DocumentFile API
+                                    val documentFile = androidx.documentfile.provider.DocumentFile.fromSingleUri(this@PlayerActivity, uri)
+                                    if (documentFile?.exists() == true) {
+                                        contentResolver.openInputStream(uri)
+                                    } else {
+                                        throw IOException("File not accessible through any method: $subtitleUrl")
+                                    }
+                                }
+                            }
+                        }
+                        else -> {
+                            // Other URI schemes
+                            contentResolver.openInputStream(uri)
+                        }
+                    } ?: throw IOException("Cannot open subtitle file: $subtitleUrl")
                 }
                 
-                val parsedSubtitles = SubtitleParser.parseSRT(inputStream)
+                android.util.Log.d("SubtitleLoader", "Parsing subtitles...")
+                val parsedSubtitles = SubtitleParser.parseSubtitles(inputStream)
                 inputStream.close()
                 
+                android.util.Log.d("SubtitleLoader", "Parsed ${parsedSubtitles.size} subtitle items")
+                
                 withContext(Dispatchers.Main) {
-                    subtitles = parsedSubtitles
-                    setupSubtitleAdapter()
-                    binding.btnSubtitlePanel.visibility = View.VISIBLE
+                    if (parsedSubtitles.isEmpty()) {
+                        showError("No subtitles found in file. Please check if the file format is correct (SRT/VTT).")
+                    } else {
+                        subtitles = parsedSubtitles
+                        setupSubtitleAdapter()
+                        binding.btnSubtitlePanel.visibility = View.VISIBLE
+                        android.util.Log.d("SubtitleLoader", "Subtitles loaded successfully")
+                    }
                 }
                 
             } catch (e: Exception) {
+                android.util.Log.e("SubtitleLoader", "Error loading subtitles", e)
                 withContext(Dispatchers.Main) {
-                    showError(getString(R.string.error_loading_subtitles) + ": " + e.message)
+                    val errorMessage = when (e) {
+                        is IllegalArgumentException -> "Invalid subtitle format: ${e.message}"
+                        is IOException -> "File access error: ${e.message}"
+                        else -> "Unexpected error: ${e.message}"
+                    }
+                    showError("${getString(R.string.error_loading_subtitles)}: $errorMessage")
                 }
             }
         }

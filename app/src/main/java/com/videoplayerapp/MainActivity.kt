@@ -308,6 +308,22 @@ class MainActivity : AppCompatActivity() {
     private fun requestPermissions() {
         val permissions = mutableListOf<String>()
         
+        // Check for Android 11+ file access permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                // Request All Files Access permission for Android 11+
+                try {
+                    val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                    intent.data = Uri.parse("package:$packageName")
+                    startActivity(intent)
+                    Toast.makeText(this, "Please grant 'All files access' permission for subtitle files", Toast.LENGTH_LONG).show()
+                } catch (e: Exception) {
+                    val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                    startActivity(intent)
+                }
+            }
+        }
+        
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) 
                 != PackageManager.PERMISSION_GRANTED) {

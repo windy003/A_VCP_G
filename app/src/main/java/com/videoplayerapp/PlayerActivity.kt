@@ -171,6 +171,32 @@ class PlayerActivity : AppCompatActivity() {
     
     
     private fun loadContent() {
+        // Check if this activity was launched to view a video file from external app
+        if (intent.action == Intent.ACTION_VIEW && intent.data != null) {
+            // Handle external file opening
+            val videoUri = intent.data!!
+            val videoUrl = videoUri.toString()
+            
+            // Generate unique ID for this video
+            currentVideoId = generateVideoId(videoUrl, null, null)
+            
+            // Load saved subtitle offset for this video
+            loadSubtitleOffset()
+            
+            // Load saved playback position
+            loadPlaybackPosition()
+            
+            // Create media source for the external video
+            val mediaSource = createMediaSource(videoUrl, null)
+            exoPlayer?.setMediaSource(mediaSource)
+            exoPlayer?.prepare()
+            exoPlayer?.playWhenReady = true
+            
+            startSubtitleUpdates()
+            return
+        }
+        
+        // Original logic for internal app usage
         val videoUrl = intent.getStringExtra("video_url") ?: return
         val audioUrl = intent.getStringExtra("audio_url")
         val subtitleUrl = intent.getStringExtra("subtitle_url")

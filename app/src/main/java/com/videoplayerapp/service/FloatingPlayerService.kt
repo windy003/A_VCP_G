@@ -11,6 +11,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.provider.Settings
 import android.view.*
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -112,7 +113,7 @@ class FloatingPlayerService : Service() {
         floatingView = LayoutInflater.from(this).inflate(R.layout.floating_player_layout, null)
         
         layoutParams = WindowManager.LayoutParams().apply {
-            width = WindowManager.LayoutParams.WRAP_CONTENT
+            width = WindowManager.LayoutParams.MATCH_PARENT
             height = WindowManager.LayoutParams.WRAP_CONTENT
             type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -120,8 +121,7 @@ class FloatingPlayerService : Service() {
                 @Suppress("DEPRECATION")
                 WindowManager.LayoutParams.TYPE_PHONE
             }
-            flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+            flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
             format = PixelFormat.TRANSLUCENT
             gravity = Gravity.TOP or Gravity.START
@@ -143,6 +143,7 @@ class FloatingPlayerService : Service() {
             val btnPlayPause = view.findViewById<ImageButton>(R.id.btnPlayPause)
             val btnRewind = view.findViewById<ImageButton>(R.id.btnRewind)
             val btnClose = view.findViewById<ImageButton>(R.id.btnClose)
+            val etNotes = view.findViewById<EditText>(R.id.etNotes)
             
             // Setup draggable buttons with click functionality
             setupDraggableButton(btnPlayPause) {
@@ -167,6 +168,20 @@ class FloatingPlayerService : Service() {
             
             setupDraggableButton(btnClose) {
                 hideFloatingWindow()
+            }
+            
+            // Setup notes EditText
+            etNotes?.setOnFocusChangeListener { _, hasFocus ->
+                layoutParams?.let { params ->
+                    if (hasFocus) {
+                        // Allow input when focused
+                        params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
+                    } else {
+                        // Prevent accidental input when not focused
+                        params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    }
+                    windowManager?.updateViewLayout(floatingView, params)
+                }
             }
             
             // Update play/pause button based on current player state

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notes text colors (Dark mode) -->
+    <color name="notes_text_color">#FFFFFFFF</color>
+    <color name="notes_hint_color">#FFAAAAAA</color>
+    <color name="notes_background">#FF1E1E1E</color>
+</resources>

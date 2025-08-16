@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.graphics.PixelFormat
 import android.os.Binder
 import android.os.Build
@@ -19,6 +20,7 @@ import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.videoplayerapp.R
@@ -53,6 +55,14 @@ class FloatingPlayerService : Service() {
         super.onCreate()
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
+    
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // When system theme changes, update floating window theme
+        if (isFloatingWindowShown) {
+            updateFloatingWindowTheme()
+        }
     }
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -218,6 +228,9 @@ class FloatingPlayerService : Service() {
             
             // Setup notes EditText
             etNotes?.let { notesEditText ->
+                // Apply theme colors to notes text
+                applyThemeToNotesEditText(notesEditText)
+                
                 // Load saved notes content
                 val savedNotes = sharedPreferences.getString(KEY_NOTES_CONTENT, "")
                 notesEditText.setText(savedNotes)
@@ -262,6 +275,35 @@ class FloatingPlayerService : Service() {
                 button.setImageResource(R.drawable.ic_pause)
             } else {
                 button.setImageResource(R.drawable.ic_play)
+            }
+        }
+    }
+    
+    private fun applyThemeToNotesEditText(editText: EditText) {
+        // Get theme colors based on current system theme
+        val textColor = ContextCompat.getColor(this, R.color.notes_text_color)
+        val hintColor = ContextCompat.getColor(this, R.color.notes_hint_color)
+        val backgroundColor = ContextCompat.getColor(this, R.color.notes_background)
+        
+        // Apply colors to EditText
+        editText.setTextColor(textColor)
+        editText.setHintTextColor(hintColor)
+        editText.setBackgroundColor(backgroundColor)
+    }
+    
+    private fun isDarkTheme(): Boolean {
+        return when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+            Configuration.UI_MODE_NIGHT_YES -> true
+            Configuration.UI_MODE_NIGHT_NO -> false
+            else -> false
+        }
+    }
+    
+    private fun updateFloatingWindowTheme() {
+        floatingView?.let { view ->
+            val etNotes = view.findViewById<EditText>(R.id.etNotes)
+            etNotes?.let { notesEditText ->
+                applyThemeToNotesEditText(notesEditText)
             }
         }
     }

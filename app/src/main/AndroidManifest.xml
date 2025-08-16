@@ -113,7 +113,8 @@
         <service
             android:name=".service.FloatingPlayerService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:configChanges="uiMode" />
 
         <service
             android:name=".service.FloatingWindowTileService"

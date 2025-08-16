@@ -585,9 +585,9 @@ class PlayerActivity : AppCompatActivity() {
     
     override fun onStop() {
         super.onStop()
-        // 在显示悬浮窗之前强制同步进度
+        // 强制同步进度，但不自动显示悬浮窗
         floatingService?.forceUpdateProgress()
-        floatingService?.showFloatingWindow()
+        // 移除自动显示悬浮窗的逻辑，只有通过 QS Tile 按钮才能显示
     }
     
     override fun onStart() {

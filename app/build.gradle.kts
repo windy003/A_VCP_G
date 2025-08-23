@@ -12,7 +12,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "2025/8/17-01"
+        versionName = "2025/8/23-01"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -70,6 +70,9 @@ dependencies {
     
     // For permissions
     implementation("androidx.fragment:fragment-ktx:1.6.2")
+    
+    // For media session support
+    implementation("androidx.media:media:1.7.0")
     
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

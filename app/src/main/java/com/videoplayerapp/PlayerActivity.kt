@@ -5,11 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.SharedPreferences
+import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.SeekBar
@@ -50,6 +53,7 @@ class PlayerActivity : AppCompatActivity() {
     private var currentVideoId: String = ""
     private var lastSavedPosition = 0L
     private val savePositionInterval = 5000L // Save position every 5 seconds
+    private var mediaSession: MediaSessionCompat? = null
     
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -82,6 +86,7 @@ class PlayerActivity : AppCompatActivity() {
         
         setupPlayer()
         setupUI()
+        setupMediaSession()
         updateSubtitleOffsetDisplay()
         loadContent()
         startFloatingService()
@@ -117,6 +122,11 @@ class PlayerActivity : AppCompatActivity() {
                             exoPlayer?.playWhenReady = true
                         }
                     }
+                    updateMediaSessionPlaybackState()
+                }
+                
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    updateMediaSessionPlaybackState()
                 }
                 
                 override fun onPositionDiscontinuity(oldPosition: androidx.media3.common.Player.PositionInfo, newPosition: androidx.media3.common.Player.PositionInfo, reason: Int) {
@@ -167,6 +177,73 @@ class PlayerActivity : AppCompatActivity() {
                 adjustSubtitleDelay(-300) // -0.3 seconds
             }
         }
+    }
+    
+    private fun setupMediaSession() {
+        mediaSession = MediaSessionCompat(this, "VideoPlayerApp").apply {
+            setCallback(object : MediaSessionCompat.Callback() {
+                override fun onPlay() {
+                    exoPlayer?.play()
+                }
+                
+                override fun onPause() {
+                    exoPlayer?.pause()
+                }
+                
+                override fun onSkipToNext() {
+                    // 快进5秒
+                    exoPlayer?.let { player ->
+                        val currentPosition = player.currentPosition
+                        val duration = player.duration
+                        val newPosition = if (duration > 0) {
+                            (currentPosition + 5000).coerceAtMost(duration)
+                        } else {
+                            currentPosition + 5000
+                        }
+                        player.seekTo(newPosition)
+                    }
+                }
+                
+                override fun onSkipToPrevious() {
+                    // 后退5秒
+                    exoPlayer?.let { player ->
+                        val currentPosition = player.currentPosition
+                        val newPosition = (currentPosition - 5000).coerceAtLeast(0)
+                        player.seekTo(newPosition)
+                    }
+                }
+                
+                override fun onSeekTo(pos: Long) {
+                    exoPlayer?.seekTo(pos)
+                }
+            })
+            isActive = true
+        }
+        updateMediaSessionPlaybackState()
+    }
+    
+    private fun updateMediaSessionPlaybackState() {
+        val player = exoPlayer ?: return
+        val session = mediaSession ?: return
+        
+        val state = if (player.isPlaying) {
+            PlaybackStateCompat.STATE_PLAYING
+        } else {
+            PlaybackStateCompat.STATE_PAUSED
+        }
+        
+        val playbackState = PlaybackStateCompat.Builder()
+            .setActions(
+                PlaybackStateCompat.ACTION_PLAY or
+                PlaybackStateCompat.ACTION_PAUSE or
+                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+                PlaybackStateCompat.ACTION_SEEK_TO
+            )
+            .setState(state, player.currentPosition, 1.0f)
+            .build()
+            
+        session.setPlaybackState(playbackState)
     }
     
     
@@ -605,6 +682,60 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
     
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        return when (keyCode) {
+            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, 
+            KeyEvent.KEYCODE_SPACE -> {
+                // 处理播放/暂停按键
+                exoPlayer?.let { player ->
+                    if (player.isPlaying) {
+                        player.pause()
+                    } else {
+                        player.play()
+                    }
+                    return true
+                }
+                false
+            }
+            KeyEvent.KEYCODE_DPAD_LEFT -> {
+                // 处理dpad left按键 - 后退5秒
+                exoPlayer?.let { player ->
+                    val currentPosition = player.currentPosition
+                    val newPosition = (currentPosition - 5000).coerceAtLeast(0)
+                    player.seekTo(newPosition)
+                    return true
+                }
+                false
+            }
+            KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                // 处理dpad right按键 - 前进5秒
+                exoPlayer?.let { player ->
+                    val currentPosition = player.currentPosition
+                    val duration = player.duration
+                    val newPosition = if (duration > 0) {
+                        (currentPosition + 5000).coerceAtMost(duration)
+                    } else {
+                        currentPosition + 5000
+                    }
+                    player.seekTo(newPosition)
+                    return true
+                }
+                false
+            }
+            KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                // 处理播放按键
+                exoPlayer?.play()
+                true
+            }
+            KeyEvent.KEYCODE_MEDIA_PAUSE -> {
+                // 处理暂停按键
+                exoPlayer?.pause()
+                true
+            }
+            else -> super.onKeyDown(keyCode, event)
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         
@@ -622,6 +753,9 @@ class PlayerActivity : AppCompatActivity() {
         }
         
         exoPlayer?.release()
+        
+        // Release media session
+        mediaSession?.release()
         
         // Stop floating service
         stopService(Intent(this, FloatingPlayerService::class.java))

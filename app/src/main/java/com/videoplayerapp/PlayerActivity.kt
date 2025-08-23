@@ -112,6 +112,8 @@ class PlayerActivity : AppCompatActivity() {
                             binding.loadingIndicator.visibility = View.GONE
                             // 确保悬浮窗服务获得最新的播放器引用
                             floatingService?.setPlayer(this@apply)
+                            // 强制显示控制器
+                            binding.playerView.showController()
                         }
                         Player.STATE_BUFFERING -> {
                             binding.loadingIndicator.visibility = View.VISIBLE
@@ -154,9 +156,9 @@ class PlayerActivity : AppCompatActivity() {
         
         binding.playerView.player = exoPlayer
         binding.playerView.useController = true // Use default ExoPlayer controls
-        binding.playerView.controllerAutoShow = false // Don't show automatically
-        binding.playerView.controllerHideOnTouch = true // Hide when touching outside controls
-        binding.playerView.controllerShowTimeoutMs = 3000 // Auto hide after 3 seconds
+        binding.playerView.controllerAutoShow = true // Show automatically
+        binding.playerView.controllerHideOnTouch = false // Don't hide when touching
+        binding.playerView.controllerShowTimeoutMs = 0 // Never auto hide
     }
     
     private fun setupUI() {
@@ -191,7 +193,7 @@ class PlayerActivity : AppCompatActivity() {
                 }
                 
                 override fun onSkipToNext() {
-                    // 快进5秒
+                    // 快进5秒并显示进度条
                     exoPlayer?.let { player ->
                         val currentPosition = player.currentPosition
                         val duration = player.duration
@@ -201,15 +203,19 @@ class PlayerActivity : AppCompatActivity() {
                             currentPosition + 5000
                         }
                         player.seekTo(newPosition)
+                        // 显示控制器
+                        binding.playerView.showController()
                     }
                 }
                 
                 override fun onSkipToPrevious() {
-                    // 后退5秒
+                    // 后退5秒并显示进度条
                     exoPlayer?.let { player ->
                         val currentPosition = player.currentPosition
                         val newPosition = (currentPosition - 5000).coerceAtLeast(0)
                         player.seekTo(newPosition)
+                        // 显示控制器
+                        binding.playerView.showController()
                     }
                 }
                 
@@ -682,6 +688,42 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
     
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        // 优先处理我们的按键逻辑，避免被 ExoPlayer 控制器拦截
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_DPAD_LEFT -> {
+                    // 处理dpad left按键 - 后退5秒并显示进度条
+                    exoPlayer?.let { player ->
+                        val currentPosition = player.currentPosition
+                        val newPosition = (currentPosition - 5000).coerceAtLeast(0)
+                        player.seekTo(newPosition)
+                        // 显示控制器
+                        binding.playerView.showController()
+                        return true
+                    }
+                }
+                KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                    // 处理dpad right按键 - 前进5秒并显示进度条
+                    exoPlayer?.let { player ->
+                        val currentPosition = player.currentPosition
+                        val duration = player.duration
+                        val newPosition = if (duration > 0) {
+                            (currentPosition + 5000).coerceAtMost(duration)
+                        } else {
+                            currentPosition + 5000
+                        }
+                        player.seekTo(newPosition)
+                        // 显示控制器
+                        binding.playerView.showController()
+                        return true
+                    }
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         return when (keyCode) {
             KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, 
@@ -693,31 +735,6 @@ class PlayerActivity : AppCompatActivity() {
                     } else {
                         player.play()
                     }
-                    return true
-                }
-                false
-            }
-            KeyEvent.KEYCODE_DPAD_LEFT -> {
-                // 处理dpad left按键 - 后退5秒
-                exoPlayer?.let { player ->
-                    val currentPosition = player.currentPosition
-                    val newPosition = (currentPosition - 5000).coerceAtLeast(0)
-                    player.seekTo(newPosition)
-                    return true
-                }
-                false
-            }
-            KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                // 处理dpad right按键 - 前进5秒
-                exoPlayer?.let { player ->
-                    val currentPosition = player.currentPosition
-                    val duration = player.duration
-                    val newPosition = if (duration > 0) {
-                        (currentPosition + 5000).coerceAtMost(duration)
-                    } else {
-                        currentPosition + 5000
-                    }
-                    player.seekTo(newPosition)
                     return true
                 }
                 false

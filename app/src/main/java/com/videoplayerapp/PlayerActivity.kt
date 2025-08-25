@@ -54,6 +54,7 @@ class PlayerActivity : AppCompatActivity() {
     private var lastSavedPosition = 0L
     private val savePositionInterval = 5000L // Save position every 5 seconds
     private var mediaSession: MediaSessionCompat? = null
+    private var isClearScreenMode = false
     
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -157,12 +158,19 @@ class PlayerActivity : AppCompatActivity() {
         binding.playerView.player = exoPlayer
         binding.playerView.useController = true // Use default ExoPlayer controls
         binding.playerView.controllerAutoShow = true // Show automatically
-        binding.playerView.controllerHideOnTouch = false // Don't hide when touching
-        binding.playerView.controllerShowTimeoutMs = 0 // Never auto hide
+        binding.playerView.controllerHideOnTouch = true // Allow hiding on touch
     }
     
     private fun setupUI() {
         binding.apply {
+            btnToggleControls?.setOnClickListener {
+                if (binding.playerView.isControllerFullyVisible()) {
+                    binding.playerView.hideController()
+                } else {
+                    binding.playerView.showController()
+                }
+            }
+            
             btnSubtitlePanel.setOnClickListener {
                 toggleSubtitlePanel()
             }
@@ -177,6 +185,22 @@ class PlayerActivity : AppCompatActivity() {
             
             btnSubtitleDelayMinus?.setOnClickListener {
                 adjustSubtitleDelay(-300) // -0.3 seconds
+            }
+            
+            btnClearScreenInline?.setOnClickListener {
+                toggleClearScreenMode()
+            }
+            
+            btnClearScreenFloat?.setOnClickListener {
+                toggleClearScreenMode()
+            }
+            
+            btnClearScreenTop?.setOnClickListener {
+                toggleClearScreenMode()
+            }
+            
+            clearScreenOverlay?.setOnClickListener {
+                toggleClearScreenMode()
             }
         }
     }
@@ -203,8 +227,10 @@ class PlayerActivity : AppCompatActivity() {
                             currentPosition + 5000
                         }
                         player.seekTo(newPosition)
-                        // 显示控制器
-                        binding.playerView.showController()
+                        // 只有在非清屏模式下才显示控制器
+                        if (!isClearScreenMode) {
+                            binding.playerView.showController()
+                        }
                     }
                 }
                 
@@ -214,8 +240,10 @@ class PlayerActivity : AppCompatActivity() {
                         val currentPosition = player.currentPosition
                         val newPosition = (currentPosition - 5000).coerceAtLeast(0)
                         player.seekTo(newPosition)
-                        // 显示控制器
-                        binding.playerView.showController()
+                        // 只有在非清屏模式下才显示控制器
+                        if (!isClearScreenMode) {
+                            binding.playerView.showController()
+                        }
                     }
                 }
                 
@@ -597,12 +625,15 @@ class PlayerActivity : AppCompatActivity() {
                     }
                     
                     // Update current subtitle display (with adjusted position for delay)
-                    val currentSubtitle = subtitles.find { it.isActiveAt(adjustedPosition) }
-                    if (currentSubtitle != null) {
-                        binding.subtitleView.text = currentSubtitle.text
-                        binding.subtitleView.visibility = View.VISIBLE
-                    } else {
-                        binding.subtitleView.visibility = View.GONE
+                    // 只有在非清屏模式下才显示字幕
+                    if (!isClearScreenMode) {
+                        val currentSubtitle = subtitles.find { it.isActiveAt(adjustedPosition) }
+                        if (currentSubtitle != null) {
+                            binding.subtitleView.text = currentSubtitle.text
+                            binding.subtitleView.visibility = View.VISIBLE
+                        } else {
+                            binding.subtitleView.visibility = View.GONE
+                        }
                     }
                     
                     // Update subtitle panel (with adjusted position for delay)
@@ -637,6 +668,69 @@ class PlayerActivity : AppCompatActivity() {
     private fun hideSubtitlePanel() {
         binding.subtitlePanel.visibility = View.GONE
         binding.btnSubtitlePanel.text = getString(R.string.show_subtitles)
+    }
+    
+    private fun toggleClearScreenMode() {
+        isClearScreenMode = !isClearScreenMode
+        updateClearScreenUI()
+    }
+    
+    private fun updateClearScreenUI() {
+        if (isClearScreenMode) {
+            // 清屏模式：隐藏所有控制元素和UI
+            binding.playerView.hideController()
+            binding.playerView.useController = false
+            binding.controlsOverlay.visibility = View.GONE
+            binding.subtitleView.visibility = View.GONE
+            binding.subtitlePanel.visibility = View.GONE
+            binding.btnClearScreenInline?.visibility = View.GONE
+            binding.btnClearScreenFloat?.visibility = View.GONE
+            binding.btnClearScreenTop?.visibility = View.GONE
+            binding.clearScreenOverlay?.visibility = View.VISIBLE
+            binding.clearScreenHint?.visibility = View.VISIBLE
+            
+            // 3秒后隐藏提示文字
+            Handler(Looper.getMainLooper()).postDelayed({
+                binding.clearScreenHint?.visibility = View.GONE
+            }, 3000)
+            
+            // 隐藏系统UI获得完全全屏体验
+            window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_FULLSCREEN
+            )
+        } else {
+            // 正常模式：显示控制器和界面元素
+            binding.playerView.useController = true
+            binding.playerView.controllerHideOnTouch = false
+            binding.playerView.controllerShowTimeoutMs = 0
+            binding.playerView.showController()
+            binding.controlsOverlay.visibility = View.VISIBLE
+            binding.btnClearScreenInline?.visibility = View.VISIBLE
+            binding.btnClearScreenFloat?.visibility = View.VISIBLE
+            binding.btnClearScreenTop?.visibility = View.VISIBLE
+            binding.clearScreenOverlay?.visibility = View.GONE
+            binding.clearScreenHint?.visibility = View.GONE
+            
+            // 恢复原来的系统UI设置
+            hideSystemUI()
+            
+            // 字幕根据实际情况显示
+            exoPlayer?.let { player ->
+                val currentPosition = player.currentPosition + subtitleDelayMs
+                val currentSubtitle = subtitles.find { it.isActiveAt(currentPosition) }
+                if (currentSubtitle != null) {
+                    binding.subtitleView.text = currentSubtitle.text
+                    binding.subtitleView.visibility = View.VISIBLE
+                } else {
+                    binding.subtitleView.visibility = View.GONE
+                }
+            }
+        }
     }
     
     private fun startFloatingService() {
@@ -698,8 +792,10 @@ class PlayerActivity : AppCompatActivity() {
                         val currentPosition = player.currentPosition
                         val newPosition = (currentPosition - 5000).coerceAtLeast(0)
                         player.seekTo(newPosition)
-                        // 显示控制器
-                        binding.playerView.showController()
+                        // 只有在非清屏模式下才显示控制器
+                        if (!isClearScreenMode) {
+                            binding.playerView.showController()
+                        }
                         return true
                     }
                 }
@@ -714,8 +810,10 @@ class PlayerActivity : AppCompatActivity() {
                             currentPosition + 5000
                         }
                         player.seekTo(newPosition)
-                        // 显示控制器
-                        binding.playerView.showController()
+                        // 只有在非清屏模式下才显示控制器
+                        if (!isClearScreenMode) {
+                            binding.playerView.showController()
+                        }
                         return true
                     }
                 }

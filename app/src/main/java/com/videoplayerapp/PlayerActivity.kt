@@ -893,6 +893,24 @@ class PlayerActivity : AppCompatActivity() {
             android.util.Log.d("PlayerActivity", "dispatchKeyEvent: keyCode=${event.keyCode}, name=${KeyEvent.keyCodeToString(event.keyCode)}")
 
             when (event.keyCode) {
+                KeyEvent.KEYCODE_ENTER,
+                KeyEvent.KEYCODE_DPAD_CENTER -> {
+                    android.util.Log.d("PlayerActivity", ">>> ENTER/DPAD_CENTER - Toggle play/pause <<<")
+                    exoPlayer?.let { player ->
+                        if (player.isPlaying) {
+                            player.pause()
+                            Toast.makeText(this, "⏸ 暂停", Toast.LENGTH_SHORT).show()
+                        } else {
+                            player.play()
+                            Toast.makeText(this, "▶ 播放", Toast.LENGTH_SHORT).show()
+                        }
+                        if (!isClearScreenMode) {
+                            binding.playerView.showController()
+                        }
+                    }
+                    return true // Consume event - don't let it reach PlayerView
+                }
+
                 KeyEvent.KEYCODE_DPAD_LEFT -> {
                     android.util.Log.d("PlayerActivity", ">>> DPAD_LEFT - Seeking backward <<<")
                     exoPlayer?.let { player ->
@@ -939,6 +957,23 @@ class PlayerActivity : AppCompatActivity() {
         Toast.makeText(this, "Key: ${KeyEvent.keyCodeToString(keyCode)}", Toast.LENGTH_SHORT).show()
 
         return when (keyCode) {
+            KeyEvent.KEYCODE_ENTER,
+            KeyEvent.KEYCODE_DPAD_CENTER -> {
+                android.util.Log.e("PlayerActivity", "!!! onKeyDown handling ENTER/DPAD_CENTER")
+                exoPlayer?.let { player ->
+                    if (player.isPlaying) {
+                        player.pause()
+                        Toast.makeText(this, "⏸ 暂停", Toast.LENGTH_SHORT).show()
+                    } else {
+                        player.play()
+                        Toast.makeText(this, "▶ 播放", Toast.LENGTH_SHORT).show()
+                    }
+                    if (!isClearScreenMode) {
+                        binding.playerView.showController()
+                    }
+                }
+                true
+            }
             KeyEvent.KEYCODE_DPAD_LEFT -> {
                 android.util.Log.e("PlayerActivity", "!!! onKeyDown handling DPAD_LEFT")
                 exoPlayer?.let { player ->

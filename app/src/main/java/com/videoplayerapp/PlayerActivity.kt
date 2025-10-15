@@ -77,20 +77,24 @@ class PlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
+
         // Keep screen on and hide system UI
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         hideSystemUI()
-        
+
         // Initialize SharedPreferences
         sharedPreferences = getSharedPreferences("subtitle_settings", Context.MODE_PRIVATE)
-        
+
         setupPlayer()
         setupUI()
         setupMediaSession()
         updateSubtitleOffsetDisplay()
         loadContent()
         startFloatingService()
+
+        // Ensure Activity always receives key events
+        // Request focus after all setup is complete
+        window.decorView.requestFocus()
     }
     
     private fun hideSystemUI() {
@@ -159,48 +163,116 @@ class PlayerActivity : AppCompatActivity() {
         binding.playerView.useController = true // Use default ExoPlayer controls
         binding.playerView.controllerAutoShow = true // Show automatically
         binding.playerView.controllerHideOnTouch = true // Allow hiding on touch
+
+        // Make PlayerView focusable to receive key events
+        binding.playerView.isFocusable = true
+        binding.playerView.isFocusableInTouchMode = true
+        binding.playerView.requestFocus()
+
+        // Critical: Intercept DPAD key events BEFORE the controller handles them
+        binding.playerView.setOnKeyListener { view, keyCode, event ->
+            android.util.Log.d("PlayerActivity", "PlayerView.onKey: keyCode=$keyCode, action=${event.action}")
+
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                when (keyCode) {
+                    KeyEvent.KEYCODE_DPAD_LEFT -> {
+                        android.util.Log.d("PlayerActivity", ">>> PlayerView: DPAD_LEFT intercepted <<<")
+                        exoPlayer?.let { player ->
+                            val currentPosition = player.currentPosition
+                            val newPosition = (currentPosition - 5000).coerceAtLeast(0)
+                            android.util.Log.d("PlayerActivity", "Seeking from $currentPosition to $newPosition")
+                            player.seekTo(newPosition)
+                            if (!isClearScreenMode) {
+                                binding.playerView.showController()
+                            }
+                            Toast.makeText(this, "后退5秒", Toast.LENGTH_SHORT).show()
+                        }
+                        true // Consume the event to prevent controller from handling it
+                    }
+                    KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                        android.util.Log.d("PlayerActivity", ">>> PlayerView: DPAD_RIGHT intercepted <<<")
+                        exoPlayer?.let { player ->
+                            val currentPosition = player.currentPosition
+                            val duration = player.duration
+                            val newPosition = if (duration > 0) {
+                                (currentPosition + 5000).coerceAtMost(duration)
+                            } else {
+                                currentPosition + 5000
+                            }
+                            android.util.Log.d("PlayerActivity", "Seeking from $currentPosition to $newPosition")
+                            player.seekTo(newPosition)
+                            if (!isClearScreenMode) {
+                                binding.playerView.showController()
+                            }
+                            Toast.makeText(this, "前进5秒", Toast.LENGTH_SHORT).show()
+                        }
+                        true // Consume the event to prevent controller from handling it
+                    }
+                    else -> false // Let controller handle other keys
+                }
+            } else {
+                false
+            }
+        }
     }
     
     private fun setupUI() {
         binding.apply {
+            // Set touch listener on root layout to reclaim focus after any touch
+            rootLayout.setOnTouchListener { v, event ->
+                // Re-request focus after touch
+                v.requestFocus()
+                false // Don't consume the event, let it propagate
+            }
+
             btnToggleControls?.setOnClickListener {
                 if (binding.playerView.isControllerFullyVisible()) {
                     binding.playerView.hideController()
                 } else {
                     binding.playerView.showController()
                 }
+                // Re-request focus after button click
+                binding.rootLayout.requestFocus()
             }
-            
+
             btnSubtitlePanel.setOnClickListener {
                 toggleSubtitlePanel()
+                binding.rootLayout.requestFocus()
             }
-            
+
             btnCloseSubtitlePanel.setOnClickListener {
                 hideSubtitlePanel()
+                binding.rootLayout.requestFocus()
             }
-            
+
             btnSubtitleDelayPlus?.setOnClickListener {
                 adjustSubtitleDelay(300) // +0.3 seconds
+                binding.rootLayout.requestFocus()
             }
-            
+
             btnSubtitleDelayMinus?.setOnClickListener {
                 adjustSubtitleDelay(-300) // -0.3 seconds
+                binding.rootLayout.requestFocus()
             }
-            
+
             btnClearScreenInline?.setOnClickListener {
                 toggleClearScreenMode()
+                binding.rootLayout.requestFocus()
             }
-            
+
             btnClearScreenFloat?.setOnClickListener {
                 toggleClearScreenMode()
+                binding.rootLayout.requestFocus()
             }
-            
+
             btnClearScreenTop?.setOnClickListener {
                 toggleClearScreenMode()
+                binding.rootLayout.requestFocus()
             }
-            
+
             clearScreenOverlay?.setOnClickListener {
                 toggleClearScreenMode()
+                binding.rootLayout.requestFocus()
             }
         }
     }
@@ -816,24 +888,28 @@ class PlayerActivity : AppCompatActivity() {
     }
     
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        // 优先处理我们的按键逻辑，避免被 ExoPlayer 控制器拦截
+        // CRITICAL: Handle DPAD keys BEFORE calling super to prevent PlayerView from consuming them
         if (event.action == KeyEvent.ACTION_DOWN) {
+            android.util.Log.d("PlayerActivity", "dispatchKeyEvent: keyCode=${event.keyCode}, name=${KeyEvent.keyCodeToString(event.keyCode)}")
+
             when (event.keyCode) {
                 KeyEvent.KEYCODE_DPAD_LEFT -> {
-                    // 处理dpad left按键 - 后退5秒并显示进度条
+                    android.util.Log.d("PlayerActivity", ">>> DPAD_LEFT - Seeking backward <<<")
                     exoPlayer?.let { player ->
                         val currentPosition = player.currentPosition
                         val newPosition = (currentPosition - 5000).coerceAtLeast(0)
+                        android.util.Log.d("PlayerActivity", "Seek: $currentPosition -> $newPosition")
                         player.seekTo(newPosition)
-                        // 只有在非清屏模式下才显示控制器
                         if (!isClearScreenMode) {
                             binding.playerView.showController()
                         }
-                        return true
+                        Toast.makeText(this, "⏪ 后退5秒", Toast.LENGTH_SHORT).show()
                     }
+                    return true // Consume event - don't let it reach PlayerView
                 }
+
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                    // 处理dpad right按键 - 前进5秒并显示进度条
+                    android.util.Log.d("PlayerActivity", ">>> DPAD_RIGHT - Seeking forward <<<")
                     exoPlayer?.let { player ->
                         val currentPosition = player.currentPosition
                         val duration = player.duration
@@ -842,22 +918,59 @@ class PlayerActivity : AppCompatActivity() {
                         } else {
                             currentPosition + 5000
                         }
+                        android.util.Log.d("PlayerActivity", "Seek: $currentPosition -> $newPosition")
                         player.seekTo(newPosition)
-                        // 只有在非清屏模式下才显示控制器
                         if (!isClearScreenMode) {
                             binding.playerView.showController()
                         }
-                        return true
+                        Toast.makeText(this, "⏩ 前进5秒", Toast.LENGTH_SHORT).show()
                     }
+                    return true // Consume event - don't let it reach PlayerView
                 }
             }
         }
+
+        // For all other keys, let the system handle them
         return super.dispatchKeyEvent(event)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        android.util.Log.e("PlayerActivity", "!!! onKeyDown called: keyCode=$keyCode, name=${KeyEvent.keyCodeToString(keyCode)}")
+        Toast.makeText(this, "Key: ${KeyEvent.keyCodeToString(keyCode)}", Toast.LENGTH_SHORT).show()
+
         return when (keyCode) {
-            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, 
+            KeyEvent.KEYCODE_DPAD_LEFT -> {
+                android.util.Log.e("PlayerActivity", "!!! onKeyDown handling DPAD_LEFT")
+                exoPlayer?.let { player ->
+                    val currentPosition = player.currentPosition
+                    val newPosition = (currentPosition - 5000).coerceAtLeast(0)
+                    player.seekTo(newPosition)
+                    if (!isClearScreenMode) {
+                        binding.playerView.showController()
+                    }
+                    Toast.makeText(this, "⏪ 后退5秒 (onKeyDown)", Toast.LENGTH_SHORT).show()
+                }
+                true
+            }
+            KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                android.util.Log.e("PlayerActivity", "!!! onKeyDown handling DPAD_RIGHT")
+                exoPlayer?.let { player ->
+                    val currentPosition = player.currentPosition
+                    val duration = player.duration
+                    val newPosition = if (duration > 0) {
+                        (currentPosition + 5000).coerceAtMost(duration)
+                    } else {
+                        currentPosition + 5000
+                    }
+                    player.seekTo(newPosition)
+                    if (!isClearScreenMode) {
+                        binding.playerView.showController()
+                    }
+                    Toast.makeText(this, "⏩ 前进5秒 (onKeyDown)", Toast.LENGTH_SHORT).show()
+                }
+                true
+            }
+            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
             KeyEvent.KEYCODE_SPACE -> {
                 // 处理播放/暂停按键
                 exoPlayer?.let { player ->
@@ -884,27 +997,46 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        android.util.Log.e("PlayerActivity", "!!! onKeyUp called: keyCode=$keyCode")
+        return super.onKeyUp(keyCode, event)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            // Re-request focus whenever window regains focus
+            window.decorView.requestFocus()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Ensure we have focus when resuming
+        window.decorView.requestFocus()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        
+
         // Save current position before destroying
         exoPlayer?.let { player ->
             if (player.currentPosition > 0) {
                 savePlaybackPosition(player.currentPosition)
             }
         }
-        
+
         updateRunnable?.let { updateHandler.removeCallbacks(it) }
-        
+
         if (isServiceBound) {
             unbindService(serviceConnection)
         }
-        
+
         exoPlayer?.release()
-        
+
         // Release media session
         mediaSession?.release()
-        
+
         // Stop floating service
         stopService(Intent(this, FloatingPlayerService::class.java))
     }

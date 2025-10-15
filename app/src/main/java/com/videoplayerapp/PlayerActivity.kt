@@ -337,49 +337,82 @@ class PlayerActivity : AppCompatActivity() {
     
     private fun createMediaSource(videoUrl: String, audioUrl: String?): MediaSource {
         val dataSourceFactory = DefaultDataSource.Factory(this)
-        
+
         return try {
             if (audioUrl != null && audioUrl.isNotEmpty()) {
                 // Validate and prepare URIs
                 val videoUri = Uri.parse(videoUrl)
                 val audioUri = Uri.parse(audioUrl)
-                
+
                 // Check URI validity before proceeding
                 if (!isUriAccessible(videoUri)) {
                     showUriNotAccessibleDialog(getString(R.string.error_video_file_not_accessible))
                     throw IllegalArgumentException("Video URI not accessible")
                 }
-                
+
                 if (!isUriAccessible(audioUri)) {
                     showUriNotAccessibleDialog(getString(R.string.error_audio_file_not_accessible))
                     throw IllegalArgumentException("Audio URI not accessible")
                 }
-                
+
                 grantUriPermissionIfNeeded(videoUri)
                 grantUriPermissionIfNeeded(audioUri)
-                
-                // Create separate video and audio sources
+
+                // Create separate video and audio sources using ProgressiveMediaSource
+                // (for local files, separate audio/video tracks are typically progressive)
                 val videoSource = ProgressiveMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(MediaItem.fromUri(videoUri))
-                
+
                 val audioSource = ProgressiveMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(MediaItem.fromUri(audioUri))
-                
+
                 // Merge video and audio sources
                 MergingMediaSource(videoSource, audioSource)
             } else {
-                // Single media source (video with embedded audio or video only)
+                // Single media source - let ExoPlayer auto-detect the appropriate source type
+                // This supports HTTP/HTTPS, RTSP, DASH, HLS, and local files
                 val videoUri = Uri.parse(videoUrl)
-                
+
                 if (!isUriAccessible(videoUri)) {
                     showUriNotAccessibleDialog(getString(R.string.error_video_file_not_accessible))
                     throw IllegalArgumentException("Video URI not accessible")
                 }
-                
+
                 grantUriPermissionIfNeeded(videoUri)
-                
-                ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(videoUri))
+
+                // Use ProgressiveMediaSource for local files and simple HTTP streams
+                // ExoPlayer will automatically handle RTSP, DASH, HLS when respective libraries are included
+                when (videoUri.scheme?.lowercase()) {
+                    "rtsp" -> {
+                        // For RTSP, use MediaItem and let ExoPlayer create the appropriate source
+                        // The RTSP library will be used automatically
+                        androidx.media3.exoplayer.source.DefaultMediaSourceFactory(dataSourceFactory)
+                            .createMediaSource(MediaItem.fromUri(videoUri))
+                    }
+                    "http", "https" -> {
+                        // For HTTP/HTTPS, check if it's HLS or DASH by URL pattern
+                        // Otherwise use Progressive
+                        val urlString = videoUri.toString().lowercase()
+                        if (urlString.contains(".m3u8") || urlString.contains("hls")) {
+                            // HLS stream
+                            androidx.media3.exoplayer.source.DefaultMediaSourceFactory(dataSourceFactory)
+                                .createMediaSource(MediaItem.fromUri(videoUri))
+                        } else if (urlString.contains(".mpd") || urlString.contains("dash")) {
+                            // DASH stream
+                            androidx.media3.exoplayer.source.DefaultMediaSourceFactory(dataSourceFactory)
+                                .createMediaSource(MediaItem.fromUri(videoUri))
+                        } else {
+                            // Progressive HTTP stream or regular video file
+                            ProgressiveMediaSource.Factory(dataSourceFactory)
+                                .createMediaSource(MediaItem.fromUri(videoUri))
+                        }
+                    }
+                    else -> {
+                        // Local files (file://, content://) use Progressive
+                        ProgressiveMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(MediaItem.fromUri(videoUri))
+                    }
+                }
             }
         } catch (e: Exception) {
             showError("${getString(R.string.error_loading_video)}: ${e.message}")
@@ -391,7 +424,7 @@ class PlayerActivity : AppCompatActivity() {
     
     private fun isUriAccessible(uri: Uri): Boolean {
         return try {
-            when (uri.scheme) {
+            when (uri.scheme?.lowercase()) {
                 "content" -> {
                     // Check if content provider is available
                     val cursor = contentResolver.query(uri, null, null, null, null)
@@ -402,8 +435,8 @@ class PlayerActivity : AppCompatActivity() {
                     val file = java.io.File(uri.path ?: "")
                     file.exists() && file.canRead()
                 }
-                "http", "https" -> {
-                    // For URLs, assume accessible (will be checked during loading)
+                "http", "https", "rtsp", "rtmp" -> {
+                    // For network streams, assume accessible (will be checked during loading)
                     true
                 }
                 else -> false
